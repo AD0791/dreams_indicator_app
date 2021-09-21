@@ -6,10 +6,12 @@ import pandas as pd
 from numpy import int16
 from enum import Enum
 
+from functions import *
+
+
+
+
 load_dotenv()
-
-
-
 # get the environment variables needed
 USER= config('USRCaris')
 PASSWORD= config('PASSCaris')
@@ -484,3 +486,49 @@ engine.dispose()
 agyw_served_period.to_excel('agyw_served_period.xlsx',index=False,na_rep="")
 agyw_served.to_excel('agyw_served.xlsx',index=False,na_rep="")
 mastersheet_served.to_excel('mastersheet_served.xlsx',index=False,na_rep="")
+
+###### Analysis
+mastersheet_served=mastersheet_served.loc[:,~mastersheet_served.columns.duplicated()]
+actif_mastersheet = mastersheet_served[mastersheet_served.id_patient.isin(agyw_served_period.id_patient)]
+actif_served =agyw_served[agyw_served.id_patient.isin(agyw_served_period.id_patient)]
+ua_mastersheet = mastersheet_served[~mastersheet_served.id_patient.isin(agyw_served_period.id_patient)]
+ua_served = agyw_served[~agyw_served.id_patient.isin(agyw_served_period.id_patient)]
+#####
+
+actif_served.nbre_pres_for_inter.fillna(0,inplace=True)
+actif_served.has_comdom_topic.fillna('no',inplace=True)
+actif_served.number_of_condoms_sensibilize.fillna(0,inplace=True)
+actif_served.number_condoms_reception_in_the_interval.fillna(0,inplace=True)
+actif_served.number_test_date_in_the_interval.fillna(0,inplace=True)
+actif_served.number_gynecological_care_date_in_the_interval.fillna(0,inplace=True)
+actif_served.number_vbg_treatment_date_in_the_interval.fillna(0,inplace=True)
+actif_served.number_prep_initiation_date_in_the_interval.fillna(0,inplace=True)
+
+
+actif_served.nbre_pres_for_inter = actif_served.nbre_pres_for_inter.astype(int16)
+actif_served.number_of_condoms_sensibilize = actif_served.number_of_condoms_sensibilize.astype(int16)
+actif_served.number_condoms_reception_in_the_interval= actif_served.number_condoms_reception_in_the_interval.astype(int16)
+actif_served.number_test_date_in_the_interval=actif_served.number_test_date_in_the_interval.astype(int16)
+actif_served.number_gynecological_care_date_in_the_interval=actif_served.number_gynecological_care_date_in_the_interval.astype(int16)
+actif_served.number_vbg_treatment_date_in_the_interval=actif_served.number_vbg_treatment_date_in_the_interval.astype(int16)
+actif_served.number_prep_initiation_date_in_the_interval=actif_served.number_prep_initiation_date_in_the_interval.astype(int16)
+
+### services
+actif_served['curriculum_detailed'] = actif_served.nbre_pres_for_inter.map(curriculum_detailed)
+actif_served['curriculum'] = actif_served.nbre_pres_for_inter.map(curriculum)
+actif_served['condom'] = actif_served.apply(lambda df: condom(df),axis=1 )
+actif_served['hts'] = actif_served.number_test_date_in_the_interval.map(hts)
+actif_served['post_violence_care'] = actif_served.apply(lambda df: postcare(df),axis=1 )
+actif_served['socioeco_app'] = actif_served.apply(lambda df: socioeco(df),axis=1 )
+actif_served['prep'] = actif_served.number_prep_initiation_date_in_the_interval.map(prep)
+
+actif_served['ps_1014'] = actif_served.apply(lambda df: prim_1014(df),axis=1 )
+actif_served['ps_1519'] = actif_served.apply(lambda df: prim_1519(df),axis=1 )
+actif_served['ps_2024'] = actif_served.apply(lambda df: prim_2024(df),axis=1 )
+actif_served['secondary_1014'] = actif_served.apply(lambda df: sec_1014(df),axis=1 )
+actif_served['secondary_1519'] = actif_served.apply(lambda df: sec_1519(df),axis=1 )
+actif_served['secondary_2024'] = actif_served.apply(lambda df: sec_2024(df),axis=1 )
+actif_served['complete_1014'] = actif_served.apply(lambda df: comp_1014(df),axis=1 )
+actif_served['complete_1519'] = actif_served.apply(lambda df: comp_1519(df),axis=1 )
+actif_served['complete_2024'] = actif_served.apply(lambda df: comp_2024(df),axis=1 )
+
