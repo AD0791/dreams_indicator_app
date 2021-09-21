@@ -1,3 +1,5 @@
+from pandas import DataFrame
+from agyw_actif import actif_served as AGYW_ACTIF
 class AgywPrev:
     """A class with properties and methods given the results of the indicator AGYW_PREV DATIM""" 
     __who_am_I ="DATIM"
