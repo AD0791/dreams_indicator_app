@@ -50,6 +50,16 @@ SELECT
                 IF(c.age_in_year >= 25
                     AND c.age_in_year <= 29,
                 '25-29','not_valid_age')))) AS age_range,
+            IF(c.age_in_year >= 10
+            AND c.age_in_year <= 17,
+        '10-17',
+        IF(c.age_in_year >= 18
+                AND c.age_in_year <= 24,
+            '18-24',
+            IF(c.age_in_year >= 25
+                    AND c.age_in_year <= 29,
+                '25-29','not_valid_age'))) AS ovc_age,
+                c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
         '0-6 months',
@@ -124,7 +134,8 @@ FROM
     (SELECT 
         dm2.id_patient,
             TIMESTAMPDIFF(MONTH, dsd.a1_dat_entvyou_a_ft_jjmmaa_egz_010817, NOW()) AS month_in_program,
-            TIMESTAMPDIFF(YEAR, dsd.nan_ki_dat_ou_fet, NOW()) AS age_in_year
+            TIMESTAMPDIFF(YEAR, dsd.nan_ki_dat_ou_fet, NOW()) AS age_in_year,
+            dsd.a1_dat_entvyou_a_ft_jjmmaa_egz_010817 AS date_interview
     FROM
         dream_member dm2
     LEFT JOIN dreams_surveys_data dsd ON dsd.case_id = dm2.case_id) c ON a.id_patient = c.id_patient
@@ -225,6 +236,16 @@ SELECT
                 IF(c.age_in_year >= 25
                     AND c.age_in_year <= 29,
                 '25-29','not_valid_age')))) AS age_range,
+                IF(c.age_in_year >= 10
+            AND c.age_in_year <= 17,
+        '10-17',
+        IF(c.age_in_year >= 18
+                AND c.age_in_year <= 24,
+            '18-24',
+            IF(c.age_in_year >= 25
+                    AND c.age_in_year <= 29,
+                '25-29','not_valid_age'))) AS ovc_age,
+                c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
         '0-6 months',
@@ -299,7 +320,8 @@ FROM
     (SELECT 
         dm2.id_patient,
             TIMESTAMPDIFF(MONTH, dsd.a1_dat_entvyou_a_ft_jjmmaa_egz_010817, NOW()) AS month_in_program,
-            TIMESTAMPDIFF(YEAR, dsd.nan_ki_dat_ou_fet, NOW()) AS age_in_year
+            TIMESTAMPDIFF(YEAR, dsd.nan_ki_dat_ou_fet, NOW()) AS age_in_year,
+            dsd.a1_dat_entvyou_a_ft_jjmmaa_egz_010817 AS date_interview
     FROM
         dream_member dm2
     LEFT JOIN dreams_surveys_data dsd ON dsd.case_id = dm2.case_id) c ON a.id_patient = c.id_patient
