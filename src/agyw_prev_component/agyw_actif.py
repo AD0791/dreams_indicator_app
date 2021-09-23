@@ -17,9 +17,9 @@ DBNAME= config('DBCaris')
 
 class Set_date(Enum):
    master_start = "2017-10-01"
-   master_end= "2021-09-30"
-   period_start = "2020-10-01"
-   period_end = "2021-09-30"
+   master_end= "2020-09-30"
+   period_start = "2019-10-01"
+   period_end = "2020-09-30"
 
 # get the engine to connect and fetch
 engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
