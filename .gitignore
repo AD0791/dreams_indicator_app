@@ -130,3 +130,6 @@ dmypy.json
 
 #no excel
 *.xlsx
+
+# mac
+.DS_Store
