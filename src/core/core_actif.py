@@ -6,9 +6,9 @@ import pandas as pd
 from numpy import int16
 from enum import Enum
 
-from functions import *
-
+from core_functions import *
 load_dotenv()
+
 # get the environment variables needed
 USER= config('USRCaris')
 PASSWORD= config('PASSCaris')
