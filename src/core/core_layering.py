@@ -52,10 +52,10 @@ class LayerServicesData:
     
 
 
-#@pdt(frozen=True)
-@pdt
+@pdt(frozen=True)
 class LayerServicesElements:
     """ convey the elements for the build of the table"""
+    who_am_i: str = "Layering Table of Services"
     age1014: str = "Aged 10-14" 
     age1519: str = "Aged 15-19" 
     age2024: str = "Aged 20-24"
@@ -63,5 +63,16 @@ class LayerServicesElements:
     status_served: str = "# served" 
     status_int: str = "Intervention"
     # type intervention
-    primary_intervention: str = "Primary Individual Intervention"
-    
+    primary_intervention: str = "Primary Individual Interventions"
+    secondary_intervention: str = "Secondary Individual Interventions"
+    #packages
+    curriculum: str = "Social Asset Building and Community-based HIV & Violence Prevention"
+    condoms: str = "Condoms"
+    hts: str = "HTS"
+    vbg: str = "VBG"
+    gyneco: str = "Gynecologique"
+    post_care_violence: str = "Post-Violence-Care"
+    schooling: str = "Education Subsidies"
+    parenting: str = "Parenting/Caregiver Programming"
+    socioeco: str = "Combination Socio-Economic Approaches"
+    prep: str = "PREP"
