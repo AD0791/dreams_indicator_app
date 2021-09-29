@@ -1,5 +1,6 @@
 from core_agyw import AgywPrev
 from dataclasses import dataclass
+from pydantic.dataclasses import dataclass as pdt
 from typing import TypeVar
 
 DF = TypeVar('pandas.core.frame.DataFrame')
@@ -7,8 +8,8 @@ DF = TypeVar('pandas.core.frame.DataFrame')
 base = AgywPrev().data_dreams_valid
 
 @dataclass(frozen=True)
-class LayerServices:
-    """convey the proper services given for the time"""
+class LayerServicesData:
+    """convey the proper services data given for the time"""
     base1014: DF = base[base.age_range=="10-14"]
     base1519: DF = base[base.age_range=="15-19"]
     base2024: DF = base[base.age_range=="20-24"]
@@ -43,3 +44,15 @@ class LayerServices:
     
 
 
+#@pdt(frozen=True)
+@pdt
+class LayerServicesElements:
+    """ convey the elements for the build of the table"""
+    age1014: str = "Aged 10-14" 
+    age1519: str = "Aged 15-19" 
+    age2024: str = "Aged 20-24"
+    # served or intervention
+    status_served: str = "# served" 
+    status_int: str = "Intervention"
+    # type intervention
+    primary_intervention: str = "timestamp"
