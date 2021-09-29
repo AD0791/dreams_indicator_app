@@ -14,6 +14,12 @@ def condom(df):
 
 def hts(hd):
     return "yes" if hd>0 else "no"
+
+def vbg(vbg):
+    return "yes" if vbg>0 else "no"
+
+def gyneco(gyneco):
+    return "yes" if gyneco>0 else "no"
     
 
 def prep(pd):

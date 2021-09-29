@@ -428,6 +428,8 @@ actif_served['curriculum_detailed'] = actif_served.nbre_pres_for_inter.map(curri
 actif_served['curriculum'] = actif_served.nbre_pres_for_inter.map(curriculum)
 actif_served['condom'] = actif_served.apply(lambda df: condom(df),axis=1 )
 actif_served['hts'] = actif_served.number_test_date_in_the_interval.map(hts)
+actif_served['vbg'] = actif_served.number_vbg_treatment_date_in_the_interval.map(vbg)
+actif_served['gyneco'] = actif_served.number_gynecological_care_date_in_the_interval.map(gyneco)
 actif_served['post_violence_care'] = actif_served.apply(lambda df: postcare(df),axis=1 )
 actif_served['socioeco_app'] = actif_served.apply(lambda df: socioeco(df),axis=1 )
 actif_served['prep'] = actif_served.number_prep_initiation_date_in_the_interval.map(prep)

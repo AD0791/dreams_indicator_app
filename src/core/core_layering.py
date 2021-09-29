@@ -25,6 +25,14 @@ class LayerServicesData:
     hts_1014: int = base1014[(base1014.hts=="yes")].id_patient.count()
     hts_1519: int = base1519[(base1519.hts=="yes")].id_patient.count()
     hts_2024: int = base2024[(base2024.hts=="yes")].id_patient.count()
+    # vbg
+    vbg_1014: int = base1014[(base1014.vbg=="yes")].id_patient.count()
+    vbg_1519: int = base1519[(base1519.vbg=="yes")].id_patient.count()
+    vbg_2024: int = base2024[(base2024.vbg=="yes")].id_patient.count()
+    # gynecologique
+    gyneco_1014: int = base1014[(base1014.gyneco=="yes")].id_patient.count()
+    gyneco_1519: int = base1519[(base1519.gyneco=="yes")].id_patient.count()
+    gyneco_2024: int = base2024[(base2024.gyneco=="yes")].id_patient.count()
     # Post care Violence
     post_violence_care_1014: int = base1014[(base1014.post_violence_care=="yes")].id_patient.count()
     post_violence_care_1519: int = base1519[(base1519.post_violence_care=="yes")].id_patient.count()
@@ -55,4 +63,5 @@ class LayerServicesElements:
     status_served: str = "# served" 
     status_int: str = "Intervention"
     # type intervention
-    primary_intervention: str = "timestamp"
+    primary_intervention: str = "Primary Individual Intervention"
+    
