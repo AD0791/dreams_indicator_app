@@ -49,6 +49,21 @@ class LayerServicesData:
     ps_1014: int = base1014[(base1014.ps_1014=="primary")].id_patient.count()
     ps_1519: int = base1519[(base1519.ps_1519=="primary")].id_patient.count()
     ps_2024: int = base2024[(base2024.ps_2024=="primary")].id_patient.count()
+    # missing services
+    # schooling
+    schooling_1014: None =  None #base1014[(base1014.schooling=="yes")].id_patient.count()
+    schooling_1519: None = None  #base1519[(base1519.schooling=="yes")].id_patient.count()
+    schooling_2024: None = None #base2024[(base2024.schooling=="yes")].id_patient.count()
+    # gynecologique
+    conceptive_1014: None =  None #base1014[(base1014.conceptive=="yes")].id_patient.count()
+    conceptive_1519: None =  None #base1519[(base1519.conceptive=="yes")].id_patient.count()
+    conceptive_2024: None =  None #base2024[(base2024.conceptive=="yes")].id_patient.count()
+    # Post care Violence
+    parenting_1014: None =  None #base1014[(base1014.parenting=="yes")].id_patient.count()
+    parenting_1519: None =  None #base1519[(base1519.parenting=="yes")].id_patient.count()
+    parenting_2024: None =  None #base2024[(base2024.post_violence_care=="yes")].id_patient.count()
+    
+    
     
 
 
@@ -76,3 +91,6 @@ class LayerServicesElements:
     parenting: str = "Parenting/Caregiver Programming"
     socioeco: str = "Combination Socio-Economic Approaches"
     prep: str = "PREP"
+    # primary package
+    ps1519: str = "Social Asset Building and Community-based HIV & Violence Prevention & condoms"
+    ps2024: str = "Social Asset Building and Community-based HIV & Violence Prevention & condoms"
