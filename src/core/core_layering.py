@@ -1,4 +1,6 @@
-from core_agyw import AgywPrev
+from sys import path
+path.insert(0, '../static')
+from agyw import AgywPrev
 from dataclasses import dataclass
 from pydantic.dataclasses import dataclass as pdt
 from typing import TypeVar
@@ -59,9 +61,9 @@ class LayerServicesData:
     contraceptive_1519: None =  None #base1519[(base1519.conceptive=="yes")].id_patient.count()
     contraceptive_2024: None =  None #base2024[(base2024.conceptive=="yes")].id_patient.count()
     # Post care Violence
-    parenting_1014: None =  None #base1014[(base1014.parenting=="yes")].id_patient.count()
-    parenting_1519: None =  None #base1519[(base1519.parenting=="yes")].id_patient.count()
-    parenting_2024: None =  None #base2024[(base2024.post_violence_care=="yes")].id_patient.count()
+    parenting_1014: int = base1014[(base1014.parenting=="yes")].id_patient.count()
+    parenting_1519: int =  base1519[(base1519.parenting=="yes")].id_patient.count()
+    parenting_2024: int =  base2024[(base2024.parenting=="yes")].id_patient.count()
     
     
     

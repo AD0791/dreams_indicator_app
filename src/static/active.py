@@ -488,8 +488,8 @@ actif_served.number_prep_initiation_date_in_the_interval=actif_served.number_pre
 actif_served.nbre_parenting_coupe_present=actif_served.nbre_parenting_coupe_present.astype(int16)
 
 ### services
-actif_served['parenting_detailed'] = actif_served.nbre_pres_for_inter.map(parenting_detailed)
-actif_served['parenting'] = actif_served.nbre_pres_for_inter.map(parenting)
+actif_served['parenting_detailed'] = actif_served.nbre_parenting_coupe_present.map(parenting_detailed)
+actif_served['parenting'] = actif_served.nbre_parenting_coupe_present.map(parenting)
 actif_served['curriculum_detailed'] = actif_served.nbre_pres_for_inter.map(curriculum_detailed)
 actif_served['curriculum'] = actif_served.nbre_pres_for_inter.map(curriculum)
 actif_served['condom'] = actif_served.apply(lambda df: condom(df),axis=1 )
