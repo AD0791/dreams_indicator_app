@@ -1,6 +1,6 @@
 import pymysql
 from sqlalchemy import create_engine
-from decouple import config 
+from decouple import config
 from dotenv import load_dotenv
 import pandas as pd
 from numpy import int16
@@ -10,32 +10,37 @@ from ovc_serv_functions import *
 
 load_dotenv()
 # get the environment variables needed
-USER= config('USRCaris')
-PASSWORD= config('PASSCaris')
-HOSTNAME= config('HOSTCaris')
-DBNAME= config('DBCaris')
+USER = config('USRCaris')
+PASSWORD = config('PASSCaris')
+HOSTNAME = config('HOSTCaris')
+DBNAME = config('DBCaris')
+
 
 class Set_date(Enum):
-   master_start = "2017-10-01"
-   master_end= "2021-09-30"
-   period_Qi_start = "2021-04-01"
-   period_Qi_end = "2021-06-30"
-   period_Qj_start = "2021-07-01"
-   period_Qj_end = "2021-09-30"
-   
-# get the engine to connect and fetch
-engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+    master_start = "2017-10-01"
+    master_end = "2021-09-30"
+    period_Qi_start = "2021-04-01"
+    period_Qi_end = "2021-06-30"
+    period_Qj_start = "2021-07-01"
+    period_Qj_end = "2021-09-30"
 
-####### logic
+
+# get the engine to connect and fetch
+engine = create_engine(
+    f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+
+# logic
 # i<j
 ##########
 
 query_master = f"""
 SELECT 
     a.id_patient,
+    h.id_parenting_group,
     g.departement,
     g.commune,
     b.nbre_pres_for_inter,
+    h.nbre_parenting_coupe_present,
     b.has_comdom_topic,
     d.number_of_condoms_sensibilize,
     d.number_condoms_reception_in_the_interval,
@@ -54,18 +59,22 @@ SELECT
                     AND c.age_in_year <= 24,
                 '20-24',
                 IF(c.age_in_year >= 25
-                    AND c.age_in_year <= 29,
-                '25-29','not_valid_age')))) AS age_range,
-                IF(c.age_in_year >= 10
+                        AND c.age_in_year <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS age_range,
+    IF(c.age_in_year >= 10
+            AND c.age_in_year <= 14,
+        '10-14',if(c.age_in_year >= 15
             AND c.age_in_year <= 17,
-        '10-17',
+        '15-17',
         IF(c.age_in_year >= 18
                 AND c.age_in_year <= 24,
             '18-24',
             IF(c.age_in_year >= 25
                     AND c.age_in_year <= 29,
-                '25-29','not_valid_age'))) AS ovc_age,
-                c.date_interview,
+                '25-29',
+                'not_valid_age')))) AS ovc_age,
+    c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
         '0-6 months',
@@ -82,7 +91,9 @@ SELECT
     IF(f.id_patient IS NOT NULL,
         'yes',
         'no') AS gardening,
-        if(past.id_patient is not null, "yes","no") as has_a_service_with_date_in_the_past
+    IF(past.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_a_service_with_date_in_the_past
 FROM
     ((SELECT 
         dhi.id_patient
@@ -100,13 +111,23 @@ FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
-        dga.value="P" and dgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}') UNION (SELECT 
+        dga.value = 'P'
+            AND dgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}') UNION (SELECT 
+        dpga.id_patient
+    FROM
+        dream_parenting_group_attendance dpga
+    LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
+    WHERE
+        (dpga.parent_g = 'P'
+            OR dpga.parent_vd = 'P'
+            OR dpga.yg_g = 'P'
+            OR dpga.yg_vd = 'P')
+            AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')  UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
     INNER JOIN patient p ON p.id = dm.id_patient
-    INNER JOIN muso_group_members mgm ON mgm.id_patient = dm.id_patient
-    ) UNION (SELECT 
+    INNER JOIN muso_group_members mgm ON mgm.id_patient = dm.id_patient) UNION (SELECT 
         dmx.id_patient
     FROM
         dream_member dmx
@@ -187,34 +208,49 @@ FROM
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
     LEFT JOIN lookup_commune lc ON lc.id = dh.commune
     LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
-    
-    LEFT JOIN ((SELECT 
+        LEFT JOIN
+        
+        (SELECT 
+        dpga.id_patient, count(*) as nbre_parenting_coupe_present,dpgs.id_group as id_parenting_group
+    FROM
+        dream_parenting_group_attendance dpga
+    LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
+    WHERE
+        (dpga.parent_g = 'P'
+            OR dpga.parent_vd = 'P'
+            OR dpga.yg_g = 'P'
+            OR dpga.yg_vd = 'P')
+            AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'
+            group by id_patient
+            ) h on h.id_patient=a.id_patient
+            LEFT JOIN
+    ((SELECT 
         dhi.id_patient
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date <'{Set_date.master_start.value}' )
+        (dhi.test_date < '{Set_date.master_start.value}')
             OR (dhi.condoms_reception_date < '{Set_date.master_start.value}')
             OR (dhi.vbg_treatment_date < '{Set_date.master_start.value}')
             OR (dhi.gynecological_care_date < '{Set_date.master_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.master_start.value}')
-            ) UNION (SELECT 
+            OR (dhi.prep_initiation_date < '{Set_date.master_start.value}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
-        dga.value="P" and dgs.date < '{Set_date.master_start.value}') 
-    
-    ) past on past.id_patient=a.id_patient
+        dga.value = 'P'
+            AND dgs.date < '{Set_date.master_start.value}')) past ON past.id_patient = a.id_patient
 """
 
 query_Qi_period = f"""
 SELECT 
     a.id_patient,
+    h.id_parenting_group,
     g.departement,
     g.commune,
     b.nbre_pres_for_inter,
+    h.nbre_parenting_coupe_present,
     b.has_comdom_topic,
     d.number_of_condoms_sensibilize,
     d.number_condoms_reception_in_the_interval,
@@ -233,18 +269,22 @@ SELECT
                     AND c.age_in_year <= 24,
                 '20-24',
                 IF(c.age_in_year >= 25
-                    AND c.age_in_year <= 29,
-                '25-29','not_valid_age')))) AS age_range,
-            IF(c.age_in_year >= 10
+                        AND c.age_in_year <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS age_range,
+    IF(c.age_in_year >= 10
+            AND c.age_in_year <= 14,
+        '10-14',if(c.age_in_year >= 15
             AND c.age_in_year <= 17,
-        '10-17',
+        '15-17',
         IF(c.age_in_year >= 18
                 AND c.age_in_year <= 24,
             '18-24',
             IF(c.age_in_year >= 25
                     AND c.age_in_year <= 29,
-                '25-29','not_valid_age'))) AS ovc_age,
-                c.date_interview,
+                '25-29',
+                'not_valid_age')))) AS ovc_age,
+    c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
         '0-6 months',
@@ -261,7 +301,9 @@ SELECT
     IF(f.id_patient IS NOT NULL,
         'yes',
         'no') AS gardening,
-        if(past.id_patient is not null, "yes","no") as has_a_service_with_date_in_the_past
+    IF(past.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_a_service_with_date_in_the_past
 FROM
     ((SELECT 
         dhi.id_patient
@@ -279,13 +321,23 @@ FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
-        dga.value="P" and dgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}') UNION (SELECT 
+        dga.value = 'P'
+            AND dgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}') UNION (SELECT 
+        dpga.id_patient
+    FROM
+        dream_parenting_group_attendance dpga
+    LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
+    WHERE
+        (dpga.parent_g = 'P'
+            OR dpga.parent_vd = 'P'
+            OR dpga.yg_g = 'P'
+            OR dpga.yg_vd = 'P')
+            AND dpgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')  UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
     INNER JOIN patient p ON p.id = dm.id_patient
-    INNER JOIN muso_group_members mgm ON mgm.id_patient = dm.id_patient
-    ) UNION (SELECT 
+    INNER JOIN muso_group_members mgm ON mgm.id_patient = dm.id_patient) UNION (SELECT 
         dmx.id_patient
     FROM
         dream_member dmx
@@ -366,35 +418,51 @@ FROM
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
     LEFT JOIN lookup_commune lc ON lc.id = dh.commune
     LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
-    
-    LEFT JOIN ((SELECT 
+        LEFT JOIN
+        
+        (SELECT 
+        dpga.id_patient, count(*) as nbre_parenting_coupe_present,dpgs.id_group as id_parenting_group
+    FROM
+        dream_parenting_group_attendance dpga
+    LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
+    WHERE
+        (dpga.parent_g = 'P'
+            OR dpga.parent_vd = 'P'
+            OR dpga.yg_g = 'P'
+            OR dpga.yg_vd = 'P')
+            AND dpgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}'
+            group by id_patient
+            ) h on h.id_patient=a.id_patient
+            LEFT JOIN
+    ((SELECT 
         dhi.id_patient
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date <'{Set_date.period_Qi_start.value}' )
+        (dhi.test_date < '{Set_date.period_Qi_start.value}')
             OR (dhi.condoms_reception_date < '{Set_date.period_Qi_start.value}')
             OR (dhi.vbg_treatment_date < '{Set_date.period_Qi_start.value}')
             OR (dhi.gynecological_care_date < '{Set_date.period_Qi_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.period_Qi_start.value}')
-            ) UNION (SELECT 
+            OR (dhi.prep_initiation_date < '{Set_date.period_Qi_start.value}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
-        dga.value="P" and dgs.date < '{Set_date.period_Qi_start.value}') 
-    
-    ) past on past.id_patient=a.id_patient
+        dga.value = 'P'
+            AND dgs.date < '{Set_date.period_Qi_start.value}')) past ON past.id_patient = a.id_patient
+
 """
 
 
 query_Qj_period = f"""
 SELECT 
     a.id_patient,
+    h.id_parenting_group,
     g.departement,
     g.commune,
     b.nbre_pres_for_inter,
+    h.nbre_parenting_coupe_present,
     b.has_comdom_topic,
     d.number_of_condoms_sensibilize,
     d.number_condoms_reception_in_the_interval,
@@ -413,18 +481,22 @@ SELECT
                     AND c.age_in_year <= 24,
                 '20-24',
                 IF(c.age_in_year >= 25
-                    AND c.age_in_year <= 29,
-                '25-29','not_valid_age')))) AS age_range,
-            IF(c.age_in_year >= 10
+                        AND c.age_in_year <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS age_range,
+    IF(c.age_in_year >= 10
+            AND c.age_in_year <= 14,
+        '10-14',if(c.age_in_year >= 15
             AND c.age_in_year <= 17,
-        '10-17',
+        '15-17',
         IF(c.age_in_year >= 18
                 AND c.age_in_year <= 24,
             '18-24',
             IF(c.age_in_year >= 25
                     AND c.age_in_year <= 29,
-                '25-29','not_valid_age'))) AS ovc_age,
-                c.date_interview,
+                '25-29',
+                'not_valid_age')))) AS ovc_age,
+    c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
         '0-6 months',
@@ -441,7 +513,9 @@ SELECT
     IF(f.id_patient IS NOT NULL,
         'yes',
         'no') AS gardening,
-        if(past.id_patient is not null, "yes","no") as has_a_service_with_date_in_the_past
+    IF(past.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_a_service_with_date_in_the_past
 FROM
     ((SELECT 
         dhi.id_patient
@@ -459,13 +533,23 @@ FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
-        dga.value="P" and dgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}') UNION (SELECT 
+        dga.value = 'P'
+            AND dgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}') UNION (SELECT 
+        dpga.id_patient
+    FROM
+        dream_parenting_group_attendance dpga
+    LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
+    WHERE
+        (dpga.parent_g = 'P'
+            OR dpga.parent_vd = 'P'
+            OR dpga.yg_g = 'P'
+            OR dpga.yg_vd = 'P')
+            AND dpgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')  UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
     INNER JOIN patient p ON p.id = dm.id_patient
-    INNER JOIN muso_group_members mgm ON mgm.id_patient = dm.id_patient
-    ) UNION (SELECT 
+    INNER JOIN muso_group_members mgm ON mgm.id_patient = dm.id_patient) UNION (SELECT 
         dmx.id_patient
     FROM
         dream_member dmx
@@ -546,38 +630,54 @@ FROM
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
     LEFT JOIN lookup_commune lc ON lc.id = dh.commune
     LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
-    
-    LEFT JOIN ((SELECT 
+        LEFT JOIN
+        
+        (SELECT 
+        dpga.id_patient, count(*) as nbre_parenting_coupe_present,dpgs.id_group as id_parenting_group
+    FROM
+        dream_parenting_group_attendance dpga
+    LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
+    WHERE
+        (dpga.parent_g = 'P'
+            OR dpga.parent_vd = 'P'
+            OR dpga.yg_g = 'P'
+            OR dpga.yg_vd = 'P')
+            AND dpgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}'
+            group by id_patient
+            ) h on h.id_patient=a.id_patient
+            LEFT JOIN
+    ((SELECT 
         dhi.id_patient
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date <'{Set_date.period_Qj_start.value}' )
+        (dhi.test_date < '{Set_date.period_Qj_start.value}')
             OR (dhi.condoms_reception_date < '{Set_date.period_Qj_start.value}')
             OR (dhi.vbg_treatment_date < '{Set_date.period_Qj_start.value}')
             OR (dhi.gynecological_care_date < '{Set_date.period_Qj_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.period_Qj_start.value}')
-            ) UNION (SELECT 
+            OR (dhi.prep_initiation_date < '{Set_date.period_Qj_start.value}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
     WHERE
-        dga.value="P" and dgs.date < '{Set_date.period_Qj_start.value}') 
-    
-    ) past on past.id_patient=a.id_patient
+        dga.value = 'P'
+            AND dgs.date < '{Set_date.period_Qj_start.value}')) past ON past.id_patient = a.id_patient
+
 """
 
 
-global_served = pd.read_sql_query(query_master,engine,parse_dates=True)
-agyw_served_Qi = pd.read_sql_query(query_Qi_period,engine,parse_dates=True)
-agyw_served_Qj = pd.read_sql_query(query_Qj_period,engine,parse_dates=True)
+global_served = pd.read_sql_query(query_master, engine, parse_dates=True)
+agyw_served_Qi = pd.read_sql_query(query_Qi_period, engine, parse_dates=True)
+agyw_served_Qj = pd.read_sql_query(query_Qj_period, engine, parse_dates=True)
 
 # close the pool of connection
 engine.dispose()
 
-actif_served_Qi = global_served[global_served.id_patient.isin(agyw_served_Qi.id_patient)]
-actif_served_Qj = global_served[global_served.id_patient.isin(agyw_served_Qj.id_patient)]
+actif_served_Qi = global_served[global_served.id_patient.isin(
+    agyw_served_Qi.id_patient)]
+actif_served_Qj = global_served[global_served.id_patient.isin(
+    agyw_served_Qj.id_patient)]
 
 actif_Q3 = actif_served_Qi
 actif_Q4 = actif_served_Qj
@@ -587,121 +687,222 @@ actif_in_Q3strict = actif_Q3[~actif_Q3.id_patient.isin(actif_Q4.id_patient)]
 actif_in_Q4strict = actif_Q4[~actif_Q4.id_patient.isin(actif_Q3.id_patient)]
 
 
-
 #################################################################
 #################################
+#################################
 
-actif_in_Q3strict.nbre_pres_for_inter.fillna(0,inplace=True)
-actif_in_Q3strict.has_comdom_topic.fillna('no',inplace=True)
-actif_in_Q3strict.number_of_condoms_sensibilize.fillna(0,inplace=True)
-actif_in_Q3strict.number_condoms_reception_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3strict.number_test_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3strict.number_gynecological_care_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3strict.number_vbg_treatment_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3strict.number_prep_initiation_date_in_the_interval.fillna(0,inplace=True)
+# Q3 strict
 
-
-actif_in_Q3strict.nbre_pres_for_inter = actif_in_Q3strict.nbre_pres_for_inter.astype(int16)
-actif_in_Q3strict.number_of_condoms_sensibilize = actif_in_Q3strict.number_of_condoms_sensibilize.astype(int16)
-actif_in_Q3strict.number_condoms_reception_in_the_interval= actif_in_Q3strict.number_condoms_reception_in_the_interval.astype(int16)
-actif_in_Q3strict.number_test_date_in_the_interval=actif_in_Q3strict.number_test_date_in_the_interval.astype(int16)
-actif_in_Q3strict.number_gynecological_care_date_in_the_interval=actif_in_Q3strict.number_gynecological_care_date_in_the_interval.astype(int16)
-actif_in_Q3strict.number_vbg_treatment_date_in_the_interval=actif_in_Q3strict.number_vbg_treatment_date_in_the_interval.astype(int16)
-actif_in_Q3strict.number_prep_initiation_date_in_the_interval=actif_in_Q3strict.number_prep_initiation_date_in_the_interval.astype(int16)
-
-### services
-actif_in_Q3strict['curriculum_detailed'] = actif_in_Q3strict.nbre_pres_for_inter.map(curriculum_detailed)
-actif_in_Q3strict['curriculum'] = actif_in_Q3strict.nbre_pres_for_inter.map(curriculum)
-actif_in_Q3strict['condom'] = actif_in_Q3strict.apply(lambda df: condom(df),axis=1 )
-actif_in_Q3strict['hts'] = actif_in_Q3strict.number_test_date_in_the_interval.map(hts)
-actif_in_Q3strict['post_violence_care'] = actif_in_Q3strict.apply(lambda df: postcare(df),axis=1 )
-actif_in_Q3strict['socioeco_app'] = actif_in_Q3strict.apply(lambda df: socioeco(df),axis=1 )
-actif_in_Q3strict['prep'] = actif_in_Q3strict.number_prep_initiation_date_in_the_interval.map(prep)
-
-actif_in_Q3strict['ps_1014'] = actif_in_Q3strict.apply(lambda df: prim_1014(df),axis=1 )
-actif_in_Q3strict['ps_1519'] = actif_in_Q3strict.apply(lambda df: prim_1519(df),axis=1 )
-actif_in_Q3strict['ps_2024'] = actif_in_Q3strict.apply(lambda df: prim_2024(df),axis=1 )
-actif_in_Q3strict['secondary_1014'] = actif_in_Q3strict.apply(lambda df: sec_1014(df),axis=1 )
-actif_in_Q3strict['secondary_1519'] = actif_in_Q3strict.apply(lambda df: sec_1519(df),axis=1 )
-actif_in_Q3strict['secondary_2024'] = actif_in_Q3strict.apply(lambda df: sec_2024(df),axis=1 )
-actif_in_Q3strict['complete_1014'] = actif_in_Q3strict.apply(lambda df: comp_1014(df),axis=1 )
-actif_in_Q3strict['complete_1519'] = actif_in_Q3strict.apply(lambda df: comp_1519(df),axis=1 )
-actif_in_Q3strict['complete_2024'] = actif_in_Q3strict.apply(lambda df: comp_2024(df),axis=1 )
-
-#######
-
-actif_in_Q4strict.nbre_pres_for_inter.fillna(0,inplace=True)
-actif_in_Q4strict.has_comdom_topic.fillna('no',inplace=True)
-actif_in_Q4strict.number_of_condoms_sensibilize.fillna(0,inplace=True)
-actif_in_Q4strict.number_condoms_reception_in_the_interval.fillna(0,inplace=True)
-actif_in_Q4strict.number_test_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q4strict.number_gynecological_care_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q4strict.number_vbg_treatment_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q4strict.number_prep_initiation_date_in_the_interval.fillna(0,inplace=True)
+actif_in_Q3strict.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q3strict.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q3strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q3strict.number_condoms_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q3strict.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q3strict.number_gynecological_care_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q3strict.number_vbg_treatment_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q3strict.number_prep_initiation_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q3strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q4strict.nbre_pres_for_inter = actif_in_Q4strict.nbre_pres_for_inter.astype(int16)
-actif_in_Q4strict.number_of_condoms_sensibilize = actif_in_Q4strict.number_of_condoms_sensibilize.astype(int16)
-actif_in_Q4strict.number_condoms_reception_in_the_interval= actif_in_Q4strict.number_condoms_reception_in_the_interval.astype(int16)
-actif_in_Q4strict.number_test_date_in_the_interval=actif_in_Q4strict.number_test_date_in_the_interval.astype(int16)
-actif_in_Q4strict.number_gynecological_care_date_in_the_interval=actif_in_Q4strict.number_gynecological_care_date_in_the_interval.astype(int16)
-actif_in_Q4strict.number_vbg_treatment_date_in_the_interval=actif_in_Q4strict.number_vbg_treatment_date_in_the_interval.astype(int16)
-actif_in_Q4strict.number_prep_initiation_date_in_the_interval=actif_in_Q4strict.number_prep_initiation_date_in_the_interval.astype(int16)
+actif_in_Q3strict.nbre_pres_for_inter = actif_in_Q3strict.nbre_pres_for_inter.astype(
+    int16)
+actif_in_Q3strict.number_of_condoms_sensibilize = actif_in_Q3strict.number_of_condoms_sensibilize.astype(
+    int16)
+actif_in_Q3strict.number_condoms_reception_in_the_interval = actif_in_Q3strict.number_condoms_reception_in_the_interval.astype(
+    int16)
+actif_in_Q3strict.number_test_date_in_the_interval = actif_in_Q3strict.number_test_date_in_the_interval.astype(
+    int16)
+actif_in_Q3strict.number_gynecological_care_date_in_the_interval = actif_in_Q3strict.number_gynecological_care_date_in_the_interval.astype(
+    int16)
+actif_in_Q3strict.number_vbg_treatment_date_in_the_interval = actif_in_Q3strict.number_vbg_treatment_date_in_the_interval.astype(
+    int16)
+actif_in_Q3strict.number_prep_initiation_date_in_the_interval = actif_in_Q3strict.number_prep_initiation_date_in_the_interval.astype(
+    int16)
+actif_in_Q3strict.nbre_parenting_coupe_present = actif_in_Q3strict.nbre_parenting_coupe_present.astype(
+    int16)
 
-### services
-actif_in_Q4strict['curriculum_detailed'] = actif_in_Q4strict.nbre_pres_for_inter.map(curriculum_detailed)
-actif_in_Q4strict['curriculum'] = actif_in_Q4strict.nbre_pres_for_inter.map(curriculum)
-actif_in_Q4strict['condom'] = actif_in_Q4strict.apply(lambda df: condom(df),axis=1 )
-actif_in_Q4strict['hts'] = actif_in_Q4strict.number_test_date_in_the_interval.map(hts)
-actif_in_Q4strict['post_violence_care'] = actif_in_Q4strict.apply(lambda df: postcare(df),axis=1 )
-actif_in_Q4strict['socioeco_app'] = actif_in_Q4strict.apply(lambda df: socioeco(df),axis=1 )
-actif_in_Q4strict['prep'] = actif_in_Q4strict.number_prep_initiation_date_in_the_interval.map(prep)
+actif_in_Q3strict['parenting_detailed'] = actif_in_Q3strict.nbre_parenting_coupe_present.map(
+    parenting_detailed)
+actif_in_Q3strict['parenting'] = actif_in_Q3strict.nbre_parenting_coupe_present.map(
+    parenting)
+actif_in_Q3strict['curriculum_detailed'] = actif_in_Q3strict.nbre_pres_for_inter.map(
+    curriculum_detailed)
+actif_in_Q3strict['curriculum'] = actif_in_Q3strict.nbre_pres_for_inter.map(
+    curriculum)
+actif_in_Q3strict['condom'] = actif_in_Q3strict.apply(
+    lambda df: condom(df), axis=1)
+actif_in_Q3strict['hts'] = actif_in_Q3strict.number_test_date_in_the_interval.map(
+    hts)
+actif_in_Q3strict['post_violence_care'] = actif_in_Q3strict.apply(
+    lambda df: postcare(df), axis=1)
+actif_in_Q3strict['socioeco_app'] = actif_in_Q3strict.apply(
+    lambda df: socioeco(df), axis=1)
+actif_in_Q3strict['prep'] = actif_in_Q3strict.number_prep_initiation_date_in_the_interval.map(
+    prep)
 
-actif_in_Q4strict['ps_1014'] = actif_in_Q4strict.apply(lambda df: prim_1014(df),axis=1 )
-actif_in_Q4strict['ps_1519'] = actif_in_Q4strict.apply(lambda df: prim_1519(df),axis=1 )
-actif_in_Q4strict['ps_2024'] = actif_in_Q4strict.apply(lambda df: prim_2024(df),axis=1 )
-actif_in_Q4strict['secondary_1014'] = actif_in_Q4strict.apply(lambda df: sec_1014(df),axis=1 )
-actif_in_Q4strict['secondary_1519'] = actif_in_Q4strict.apply(lambda df: sec_1519(df),axis=1 )
-actif_in_Q4strict['secondary_2024'] = actif_in_Q4strict.apply(lambda df: sec_2024(df),axis=1 )
-actif_in_Q4strict['complete_1014'] = actif_in_Q4strict.apply(lambda df: comp_1014(df),axis=1 )
-actif_in_Q4strict['complete_1519'] = actif_in_Q4strict.apply(lambda df: comp_1519(df),axis=1 )
-actif_in_Q4strict['complete_2024'] = actif_in_Q4strict.apply(lambda df: comp_2024(df),axis=1 )
+actif_in_Q3strict['ps_1014'] = actif_in_Q3strict.apply(
+    lambda df: prim_1014(df), axis=1)
+actif_in_Q3strict['ps_1519'] = actif_in_Q3strict.apply(
+    lambda df: prim_1519(df), axis=1)
+actif_in_Q3strict['ps_2024'] = actif_in_Q3strict.apply(
+    lambda df: prim_2024(df), axis=1)
+actif_in_Q3strict['secondary_1014'] = actif_in_Q3strict.apply(
+    lambda df: sec_1014(df), axis=1)
+actif_in_Q3strict['secondary_1519'] = actif_in_Q3strict.apply(
+    lambda df: sec_1519(df), axis=1)
+actif_in_Q3strict['secondary_2024'] = actif_in_Q3strict.apply(
+    lambda df: sec_2024(df), axis=1)
+actif_in_Q3strict['complete_1014'] = actif_in_Q3strict.apply(
+    lambda df: comp_1014(df), axis=1)
+actif_in_Q3strict['complete_1519'] = actif_in_Q3strict.apply(
+    lambda df: comp_1519(df), axis=1)
+actif_in_Q3strict['complete_2024'] = actif_in_Q3strict.apply(
+    lambda df: comp_2024(df), axis=1)
 
-#######
+#############################################
+# Q4 strict
 
-actif_in_Q3Q4.nbre_pres_for_inter.fillna(0,inplace=True)
-actif_in_Q3Q4.has_comdom_topic.fillna('no',inplace=True)
-actif_in_Q3Q4.number_of_condoms_sensibilize.fillna(0,inplace=True)
-actif_in_Q3Q4.number_condoms_reception_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3Q4.number_test_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3Q4.number_gynecological_care_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval.fillna(0,inplace=True)
-actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.fillna(0,inplace=True)
+actif_in_Q4strict.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q4strict.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q4strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q4strict.number_condoms_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q4strict.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q4strict.number_gynecological_care_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q4strict.number_vbg_treatment_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q4strict.number_prep_initiation_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q4strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q3Q4.nbre_pres_for_inter = actif_in_Q3Q4.nbre_pres_for_inter.astype(int16)
-actif_in_Q3Q4.number_of_condoms_sensibilize = actif_in_Q3Q4.number_of_condoms_sensibilize.astype(int16)
-actif_in_Q3Q4.number_condoms_reception_in_the_interval= actif_in_Q3Q4.number_condoms_reception_in_the_interval.astype(int16)
-actif_in_Q3Q4.number_test_date_in_the_interval=actif_in_Q3Q4.number_test_date_in_the_interval.astype(int16)
-actif_in_Q3Q4.number_gynecological_care_date_in_the_interval=actif_in_Q3Q4.number_gynecological_care_date_in_the_interval.astype(int16)
-actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval=actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval.astype(int16)
-actif_in_Q3Q4.number_prep_initiation_date_in_the_interval=actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.astype(int16)
+actif_in_Q4strict.nbre_pres_for_inter = actif_in_Q4strict.nbre_pres_for_inter.astype(
+    int16)
+actif_in_Q4strict.number_of_condoms_sensibilize = actif_in_Q4strict.number_of_condoms_sensibilize.astype(
+    int16)
+actif_in_Q4strict.number_condoms_reception_in_the_interval = actif_in_Q4strict.number_condoms_reception_in_the_interval.astype(
+    int16)
+actif_in_Q4strict.number_test_date_in_the_interval = actif_in_Q4strict.number_test_date_in_the_interval.astype(
+    int16)
+actif_in_Q4strict.number_gynecological_care_date_in_the_interval = actif_in_Q4strict.number_gynecological_care_date_in_the_interval.astype(
+    int16)
+actif_in_Q4strict.number_vbg_treatment_date_in_the_interval = actif_in_Q4strict.number_vbg_treatment_date_in_the_interval.astype(
+    int16)
+actif_in_Q4strict.number_prep_initiation_date_in_the_interval = actif_in_Q4strict.number_prep_initiation_date_in_the_interval.astype(
+    int16)
+actif_in_Q4strict.nbre_parenting_coupe_present = actif_in_Q4strict.nbre_parenting_coupe_present.astype(
+    int16)
 
-### services
-actif_in_Q3Q4['curriculum_detailed'] = actif_in_Q3Q4.nbre_pres_for_inter.map(curriculum_detailed)
+# services
+actif_in_Q4strict['parenting_detailed'] = actif_in_Q4strict.nbre_parenting_coupe_present.map(
+    parenting_detailed)
+actif_in_Q4strict['parenting'] = actif_in_Q4strict.nbre_parenting_coupe_present.map(
+    parenting)
+actif_in_Q4strict['curriculum_detailed'] = actif_in_Q4strict.nbre_pres_for_inter.map(
+    curriculum_detailed)
+actif_in_Q4strict['curriculum'] = actif_in_Q4strict.nbre_pres_for_inter.map(
+    curriculum)
+actif_in_Q4strict['condom'] = actif_in_Q4strict.apply(
+    lambda df: condom(df), axis=1)
+actif_in_Q4strict['hts'] = actif_in_Q4strict.number_test_date_in_the_interval.map(
+    hts)
+actif_in_Q4strict['post_violence_care'] = actif_in_Q4strict.apply(
+    lambda df: postcare(df), axis=1)
+actif_in_Q4strict['socioeco_app'] = actif_in_Q4strict.apply(
+    lambda df: socioeco(df), axis=1)
+actif_in_Q4strict['prep'] = actif_in_Q4strict.number_prep_initiation_date_in_the_interval.map(
+    prep)
+
+actif_in_Q4strict['ps_1014'] = actif_in_Q4strict.apply(
+    lambda df: prim_1014(df), axis=1)
+actif_in_Q4strict['ps_1519'] = actif_in_Q4strict.apply(
+    lambda df: prim_1519(df), axis=1)
+actif_in_Q4strict['ps_2024'] = actif_in_Q4strict.apply(
+    lambda df: prim_2024(df), axis=1)
+actif_in_Q4strict['secondary_1014'] = actif_in_Q4strict.apply(
+    lambda df: sec_1014(df), axis=1)
+actif_in_Q4strict['secondary_1519'] = actif_in_Q4strict.apply(
+    lambda df: sec_1519(df), axis=1)
+actif_in_Q4strict['secondary_2024'] = actif_in_Q4strict.apply(
+    lambda df: sec_2024(df), axis=1)
+actif_in_Q4strict['complete_1014'] = actif_in_Q4strict.apply(
+    lambda df: comp_1014(df), axis=1)
+actif_in_Q4strict['complete_1519'] = actif_in_Q4strict.apply(
+    lambda df: comp_1519(df), axis=1)
+actif_in_Q4strict['complete_2024'] = actif_in_Q4strict.apply(
+    lambda df: comp_2024(df), axis=1)
+
+
+##################################
+# Q3Q4
+
+actif_in_Q3Q4.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q3Q4.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q3Q4.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q3Q4.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
+actif_in_Q3Q4.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q3Q4.number_gynecological_care_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q3Q4.nbre_parenting_coupe_present.fillna(0, inplace=True)
+
+
+actif_in_Q3Q4.nbre_pres_for_inter = actif_in_Q3Q4.nbre_pres_for_inter.astype(
+    int16)
+actif_in_Q3Q4.number_of_condoms_sensibilize = actif_in_Q3Q4.number_of_condoms_sensibilize.astype(
+    int16)
+actif_in_Q3Q4.number_condoms_reception_in_the_interval = actif_in_Q3Q4.number_condoms_reception_in_the_interval.astype(
+    int16)
+actif_in_Q3Q4.number_test_date_in_the_interval = actif_in_Q3Q4.number_test_date_in_the_interval.astype(
+    int16)
+actif_in_Q3Q4.number_gynecological_care_date_in_the_interval = actif_in_Q3Q4.number_gynecological_care_date_in_the_interval.astype(
+    int16)
+actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval = actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval.astype(
+    int16)
+actif_in_Q3Q4.number_prep_initiation_date_in_the_interval = actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.astype(
+    int16)
+actif_in_Q3Q4.nbre_parenting_coupe_present = actif_in_Q3Q4.nbre_parenting_coupe_present.astype(
+    int16)
+
+
+actif_in_Q3Q4['parenting_detailed'] = actif_in_Q3Q4.nbre_parenting_coupe_present.map(
+    parenting_detailed)
+actif_in_Q3Q4['parenting'] = actif_in_Q3Q4.nbre_parenting_coupe_present.map(
+    parenting)
+actif_in_Q3Q4['curriculum_detailed'] = actif_in_Q3Q4.nbre_pres_for_inter.map(
+    curriculum_detailed)
 actif_in_Q3Q4['curriculum'] = actif_in_Q3Q4.nbre_pres_for_inter.map(curriculum)
-actif_in_Q3Q4['condom'] = actif_in_Q3Q4.apply(lambda df: condom(df),axis=1 )
+actif_in_Q3Q4['condom'] = actif_in_Q3Q4.apply(lambda df: condom(df), axis=1)
 actif_in_Q3Q4['hts'] = actif_in_Q3Q4.number_test_date_in_the_interval.map(hts)
-actif_in_Q3Q4['post_violence_care'] = actif_in_Q3Q4.apply(lambda df: postcare(df),axis=1 )
-actif_in_Q3Q4['socioeco_app'] = actif_in_Q3Q4.apply(lambda df: socioeco(df),axis=1 )
-actif_in_Q3Q4['prep'] = actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.map(prep)
+actif_in_Q3Q4['post_violence_care'] = actif_in_Q3Q4.apply(
+    lambda df: postcare(df), axis=1)
+actif_in_Q3Q4['socioeco_app'] = actif_in_Q3Q4.apply(
+    lambda df: socioeco(df), axis=1)
+actif_in_Q3Q4['prep'] = actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.map(
+    prep)
 
-actif_in_Q3Q4['ps_1014'] = actif_in_Q3Q4.apply(lambda df: prim_1014(df),axis=1 )
-actif_in_Q3Q4['ps_1519'] = actif_in_Q3Q4.apply(lambda df: prim_1519(df),axis=1 )
-actif_in_Q3Q4['ps_2024'] = actif_in_Q3Q4.apply(lambda df: prim_2024(df),axis=1 )
-actif_in_Q3Q4['secondary_1014'] = actif_in_Q3Q4.apply(lambda df: sec_1014(df),axis=1 )
-actif_in_Q3Q4['secondary_1519'] = actif_in_Q3Q4.apply(lambda df: sec_1519(df),axis=1 )
-actif_in_Q3Q4['secondary_2024'] = actif_in_Q3Q4.apply(lambda df: sec_2024(df),axis=1 )
-actif_in_Q3Q4['complete_1014'] = actif_in_Q3Q4.apply(lambda df: comp_1014(df),axis=1 )
-actif_in_Q3Q4['complete_1519'] = actif_in_Q3Q4.apply(lambda df: comp_1519(df),axis=1 )
-actif_in_Q3Q4['complete_2024'] = actif_in_Q3Q4.apply(lambda df: comp_2024(df),axis=1 )
+actif_in_Q3Q4['ps_1014'] = actif_in_Q3Q4.apply(
+    lambda df: prim_1014(df), axis=1)
+actif_in_Q3Q4['ps_1519'] = actif_in_Q3Q4.apply(
+    lambda df: prim_1519(df), axis=1)
+actif_in_Q3Q4['ps_2024'] = actif_in_Q3Q4.apply(
+    lambda df: prim_2024(df), axis=1)
+actif_in_Q3Q4['secondary_1014'] = actif_in_Q3Q4.apply(
+    lambda df: sec_1014(df), axis=1)
+actif_in_Q3Q4['secondary_1519'] = actif_in_Q3Q4.apply(
+    lambda df: sec_1519(df), axis=1)
+actif_in_Q3Q4['secondary_2024'] = actif_in_Q3Q4.apply(
+    lambda df: sec_2024(df), axis=1)
+actif_in_Q3Q4['complete_1014'] = actif_in_Q3Q4.apply(
+    lambda df: comp_1014(df), axis=1)
+actif_in_Q3Q4['complete_1519'] = actif_in_Q3Q4.apply(
+    lambda df: comp_1519(df), axis=1)
+actif_in_Q3Q4['complete_2024'] = actif_in_Q3Q4.apply(
+    lambda df: comp_2024(df), axis=1)
