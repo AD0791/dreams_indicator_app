@@ -1,6 +1,6 @@
 import pymysql
 from sqlalchemy import create_engine
-from decouple import config 
+from decouple import config
 from dotenv import load_dotenv
 import pandas as pd
 from numpy import int16
@@ -10,19 +10,22 @@ from functions import *
 load_dotenv()
 
 # get the environment variables needed
-USER= config('USRCaris')
-PASSWORD= config('PASSCaris')
-HOSTNAME= config('HOSTCaris')
-DBNAME= config('DBCaris')
+USER = config('USRCaris')
+PASSWORD = config('PASSCaris')
+HOSTNAME = config('HOSTCaris')
+DBNAME = config('DBCaris')
+
 
 class Set_date(Enum):
-   master_start = "2017-10-01"
-   master_end= "2021-09-30"
-   period_start = "2020-10-01"
-   period_end = "2021-09-30"
+    master_start = "2017-10-01"
+    master_end = "2021-09-30"
+    period_start = "2020-10-01"
+    period_end = "2021-09-30"
+
 
 # get the engine to connect and fetch
-engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+engine = create_engine(
+    f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
 
 query_period = f"""
 SELECT 
@@ -233,12 +236,6 @@ FROM
         dga.value = 'P'
             AND dgs.date < '{Set_date.period_start.value}')) past ON past.id_patient = a.id_patient
 """
-
-
-
-
-
-
 
 
 query_master = f"""
@@ -452,57 +449,73 @@ FROM
 """
 
 
-
-
-
-agyw_served_period = pd.read_sql_query(query_period,engine,parse_dates=True)
-agyw_served = pd.read_sql_query(query_master,engine,parse_dates=True)
+agyw_served_period = pd.read_sql_query(query_period, engine, parse_dates=True)
+agyw_served = pd.read_sql_query(query_master, engine, parse_dates=True)
 
 # close the pool of connection
 engine.dispose()
 
 
+# EDAnalysis
+actif_served = agyw_served[agyw_served.id_patient.isin(
+    agyw_served_period.id_patient)]
+ua_served = agyw_served[~agyw_served.id_patient.isin(
+    agyw_served_period.id_patient)]
 
-###### EDAnalysis
-actif_served =agyw_served[agyw_served.id_patient.isin(agyw_served_period.id_patient)]
-ua_served = agyw_served[~agyw_served.id_patient.isin(agyw_served_period.id_patient)]
-
-actif_served.nbre_pres_for_inter.fillna(0,inplace=True)
-actif_served.has_comdom_topic.fillna('no',inplace=True)
-actif_served.number_of_condoms_sensibilize.fillna(0,inplace=True)
-actif_served.number_condoms_reception_in_the_interval.fillna(0,inplace=True)
-actif_served.number_test_date_in_the_interval.fillna(0,inplace=True)
-actif_served.number_gynecological_care_date_in_the_interval.fillna(0,inplace=True)
-actif_served.number_vbg_treatment_date_in_the_interval.fillna(0,inplace=True)
-actif_served.number_prep_initiation_date_in_the_interval.fillna(0,inplace=True)
-actif_served.nbre_parenting_coupe_present.fillna(0,inplace=True)
+actif_served.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_served.has_comdom_topic.fillna('no', inplace=True)
+actif_served.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_served.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
+actif_served.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_served.number_gynecological_care_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_served.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
+actif_served.number_prep_initiation_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_served.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_served.nbre_pres_for_inter = actif_served.nbre_pres_for_inter.astype(int16)
-actif_served.number_of_condoms_sensibilize = actif_served.number_of_condoms_sensibilize.astype(int16)
-actif_served.number_condoms_reception_in_the_interval= actif_served.number_condoms_reception_in_the_interval.astype(int16)
-actif_served.number_test_date_in_the_interval=actif_served.number_test_date_in_the_interval.astype(int16)
-actif_served.number_gynecological_care_date_in_the_interval=actif_served.number_gynecological_care_date_in_the_interval.astype(int16)
-actif_served.number_vbg_treatment_date_in_the_interval=actif_served.number_vbg_treatment_date_in_the_interval.astype(int16)
-actif_served.number_prep_initiation_date_in_the_interval=actif_served.number_prep_initiation_date_in_the_interval.astype(int16)
-actif_served.nbre_parenting_coupe_present=actif_served.nbre_parenting_coupe_present.astype(int16)
+actif_served.nbre_pres_for_inter = actif_served.nbre_pres_for_inter.astype(
+    int16)
+actif_served.number_of_condoms_sensibilize = actif_served.number_of_condoms_sensibilize.astype(
+    int16)
+actif_served.number_condoms_reception_in_the_interval = actif_served.number_condoms_reception_in_the_interval.astype(
+    int16)
+actif_served.number_test_date_in_the_interval = actif_served.number_test_date_in_the_interval.astype(
+    int16)
+actif_served.number_gynecological_care_date_in_the_interval = actif_served.number_gynecological_care_date_in_the_interval.astype(
+    int16)
+actif_served.number_vbg_treatment_date_in_the_interval = actif_served.number_vbg_treatment_date_in_the_interval.astype(
+    int16)
+actif_served.number_prep_initiation_date_in_the_interval = actif_served.number_prep_initiation_date_in_the_interval.astype(
+    int16)
+actif_served.nbre_parenting_coupe_present = actif_served.nbre_parenting_coupe_present.astype(
+    int16)
 
-### services
-actif_served['parenting_detailed'] = actif_served.nbre_parenting_coupe_present.map(parenting_detailed)
-actif_served['parenting'] = actif_served.nbre_parenting_coupe_present.map(parenting)
-actif_served['curriculum_detailed'] = actif_served.nbre_pres_for_inter.map(curriculum_detailed)
+# services
+actif_served['parenting_detailed'] = actif_served.nbre_parenting_coupe_present.map(
+    parenting_detailed)
+actif_served['parenting'] = actif_served.nbre_parenting_coupe_present.map(
+    parenting)
+actif_served['curriculum_detailed'] = actif_served.nbre_pres_for_inter.map(
+    curriculum_detailed)
 actif_served['curriculum'] = actif_served.nbre_pres_for_inter.map(curriculum)
-actif_served['condom'] = actif_served.apply(lambda df: condom(df),axis=1 )
+actif_served['condom'] = actif_served.apply(lambda df: condom(df), axis=1)
 actif_served['hts'] = actif_served.number_test_date_in_the_interval.map(hts)
-actif_served['vbg'] = actif_served.number_vbg_treatment_date_in_the_interval.map(vbg)
-actif_served['gyneco'] = actif_served.number_gynecological_care_date_in_the_interval.map(gyneco)
-actif_served['post_violence_care'] = actif_served.apply(lambda df: postcare(df),axis=1 )
-actif_served['socioeco_app'] = actif_served.apply(lambda df: socioeco(df),axis=1 )
-actif_served['prep'] = actif_served.number_prep_initiation_date_in_the_interval.map(prep)
+actif_served['vbg'] = actif_served.number_vbg_treatment_date_in_the_interval.map(
+    vbg)
+actif_served['gyneco'] = actif_served.number_gynecological_care_date_in_the_interval.map(
+    gyneco)
+actif_served['post_violence_care'] = actif_served.apply(
+    lambda df: postcare(df), axis=1)
+actif_served['socioeco_app'] = actif_served.apply(
+    lambda df: socioeco(df), axis=1)
+actif_served['prep'] = actif_served.number_prep_initiation_date_in_the_interval.map(
+    prep)
 
-actif_served['ps_1014'] = actif_served.apply(lambda df: prim_1014(df),axis=1 )
-actif_served['ps_1519'] = actif_served.apply(lambda df: prim_1519(df),axis=1 )
-actif_served['ps_2024'] = actif_served.apply(lambda df: prim_2024(df),axis=1 )
+actif_served['ps_1014'] = actif_served.apply(lambda df: prim_1014(df), axis=1)
+actif_served['ps_1519'] = actif_served.apply(lambda df: prim_1519(df), axis=1)
+actif_served['ps_2024'] = actif_served.apply(lambda df: prim_2024(df), axis=1)
 
 """
 actif_served['secondary_1014'] = actif_served.apply(lambda df: sec_1014(df),axis=1 )
