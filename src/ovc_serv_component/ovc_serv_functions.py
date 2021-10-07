@@ -1,3 +1,5 @@
+from pandas import NaT
+
 def curriculum_detailed(pres):
     if pres >= 14:
         return "yes"
@@ -25,7 +27,7 @@ def parenting(pres):
 
 
 def condom(df):
-    return "yes" if (df.has_comdom_topic == "yes" or df.number_of_condoms_sensibilize > 0 or df.number_condoms_reception_in_the_interval > 0) else "no"
+    return "yes" if (df.has_comdom_topic == "yes" or df.number_of_condoms_sensibilize > 0 or df.number_condoms_reception_in_the_interval > 0 ) else "no" # or df.number_condoms_sensibilization_date_in_the_interval > 0
 
 
 def hts(hd):
@@ -34,6 +36,10 @@ def hts(hd):
 
 def prep(pd):
     return "yes" if pd > 0 else "no"
+
+def contraceptive(cd):
+    return "yes" if cd > 0 else "no"
+
 
 
 def postcare(df):
@@ -78,3 +84,14 @@ def comp_1519(df):
 
 def comp_2024(df):
     return "complete" if (df.age_range == "20-24" and (((df.curriculum == "yes") & (df.condom == "no")) | ((df.curriculum == "no") & (df.condom == "yes"))) and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes"))) else "no"
+
+
+
+
+
+def complete_at_least(df):
+    return "yes" if (df.curriculum=="yes" or df.condom=="yes" or df.hts=="yes" or df.post_violence_care=="yes" or df.socioeco_app=="yes" or df.prep=="yes" or df.parenting=="yes") else "no"
+
+
+def isEnrolledQ4(date):
+    return "yes" if (type(date)!=type(NaT)) and (date.year == 2021 and date.month>=7 and date.month<=9) else "no"
