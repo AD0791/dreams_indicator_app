@@ -25,7 +25,7 @@ def parenting(pres):
 
 
 def condom(df):
-    return "yes" if (df.has_comdom_topic == "yes" or df.number_of_condoms_sensibilize > 0 or df.number_condoms_reception_in_the_interval > 0) else "no"
+    return "yes" if (df.has_comdom_topic == "yes" or df.number_of_condoms_sensibilize > 0 or df.number_condoms_reception_in_the_interval > 0 or df.number_condoms_sensibilization_date_in_the_interval > 0) else "no"
 
 
 def hts(hd):
@@ -42,6 +42,10 @@ def gyneco(gyneco):
 
 def prep(pd):
     return "yes" if pd > 0 else "no"
+
+
+def contraceptive(cd):
+    return "yes" if cd > 0 else "no"
 
 
 def postcare(df):
