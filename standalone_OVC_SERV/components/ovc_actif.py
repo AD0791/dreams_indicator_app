@@ -6,7 +6,7 @@ from pandas import to_datetime, read_sql_query
 from numpy import int16
 from enum import Enum
 
-from ovc_serv_functions import *
+from .ovc_serv_functions import *
 
 load_dotenv()
 # get the environment variables needed
