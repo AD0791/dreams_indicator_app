@@ -1,9 +1,11 @@
+
 from typing import TypeVar
 from pydantic.dataclasses import dataclass as pdt
 from dataclasses import dataclass
-from agyw import AgywPrev
 from sys import path
 path.insert(0, '../static')
+from agyw import AgywPrev
+
 
 DF = TypeVar('pandas.core.frame.DataFrame')
 
