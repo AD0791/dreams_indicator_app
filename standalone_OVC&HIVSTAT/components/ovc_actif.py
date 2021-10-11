@@ -24,8 +24,7 @@ class Set_date(Enum):
 
 
 # get the engine to connect and fetch
-engine = create_engine(
-    f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
 
 # logic
 # i<j
