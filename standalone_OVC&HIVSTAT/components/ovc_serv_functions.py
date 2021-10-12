@@ -95,3 +95,17 @@ def complete_at_least(df):
 
 def isEnrolledQ4(date):
     return "yes" if (type(date)!=type(NaT)) and (date.year == 2021 and date.month>=7 and date.month<=9) else "no"
+
+
+
+##### not implemented yet
+
+
+def isHtsTested(df):
+    if (df.number_test_date_in_the_interval == 0 and df.test_results == "0,"):
+        return "no"
+    if (df.number_test_date_in_the_interval>0 or df.test_results!= "0,"):
+        return "yes"
+    
+    
+    
