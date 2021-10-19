@@ -34,6 +34,7 @@ SELECT
     d.number_of_condoms_sensibilize,
     d.number_condoms_reception_in_the_interval,
     d.number_test_date_in_the_interval,
+    d.test_results,
     d.number_vbg_treatment_date_in_the_interval,
     d.number_gynecological_care_date_in_the_interval,
     d.number_prep_initiation_date_in_the_interval,
@@ -142,7 +143,8 @@ FROM
             SUM((dhi1.gynecological_care_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
             SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-                AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval
+                AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
+                    GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
     FROM
         dream_hivinfos dhi1
     GROUP BY dhi1.id_patient) d ON a.id_patient = d.id_patient
@@ -209,6 +211,7 @@ SELECT
     d.number_of_condoms_sensibilize,
     d.number_condoms_reception_in_the_interval,
     d.number_test_date_in_the_interval,
+    d.test_results,
     d.number_vbg_treatment_date_in_the_interval,
     d.number_gynecological_care_date_in_the_interval,
     d.number_prep_initiation_date_in_the_interval,
@@ -317,7 +320,8 @@ FROM
             SUM((dhi1.gynecological_care_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
             SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-                AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval
+                AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
+                GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
     FROM
         dream_hivinfos dhi1
     GROUP BY dhi1.id_patient) d ON a.id_patient = d.id_patient
