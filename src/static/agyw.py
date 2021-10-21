@@ -5,9 +5,9 @@ from active import actif_served as AGYW_ACTIF
 class AgywPrev:
     """A class with properties and methods given the results of the indicator AGYW_PREV DATIM"""
     __who_am_I = "DATIM"
-    __datim1_title = "Number of individual AGYW that have fully completed the entire DREAMS primary package of services but have not received any services beyond the primary package."
-    __datim2_title = "Number of individual AGYW that have fully completed the entire DREAMS primary package of services AND at least one additional secondary service."
-    __datim3_title = "Number of individual AGYW that have fully completed at least one DREAMS primary package of services but not the full primary package of services."
+    __datim1_title = "Number of individual AGYW that have fully completed the entire DREAMS primary package of services/interventions but no additional services/interventions."
+    __datim2_title = "Number of individual AGYW that have fully completed the entire DREAMS primary package of services/interventions AND at least one secondary service/intervention."
+    __datim3_title = "Number of individual AGYW that have completed at least one DREAMS service/intervention but not the full primary package."
     __datim4_title = "Number of AGYW that have started a DREAMS service/intervention but have not yet completed it."
 
     def __repr__(self):
