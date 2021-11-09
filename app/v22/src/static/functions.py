@@ -1,14 +1,14 @@
 def curriculum_detailed(pres):
-    if pres >= 14:
+    if pres >= 17:
         return "yes"
-    elif 1 <= pres <= 13:
+    elif 1 <= pres <= 16:
         return "has_started"
     else:
         return "no"
 
 
 def curriculum(pres):
-    return "yes" if pres >= 14 else "no"
+    return "yes" if pres >= 17 else "no"
 
 
 def parenting_detailed(pres):
