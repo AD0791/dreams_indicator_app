@@ -36,6 +36,7 @@ SELECT
 	b.nbre_pres_for_inter,
 	h.nbre_parenting_coupe_present,
 	b.has_comdom_topic,
+	b.has_preventive_vbg,
 	d.number_of_condoms_sensibilize,
 	d.number_condoms_sensibilization_date_in_the_interval,
 	d.number_condoms_reception_in_the_interval,
@@ -96,14 +97,17 @@ GROUP BY
 					SELECT
 						xy.id_patient,
 						COUNT(*) AS nbre_pres_for_inter,
-						IF((SUM(number_of_session_s_08) > 0 OR SUM(number_of_session_s_10) > 0 OR SUM(number_of_session_s_11) > 0 OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic
+						IF((SUM(number_of_session_s_08) > 0 OR SUM(number_of_session_s_10) > 0 OR SUM(number_of_session_s_11) > 0 OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic,
+                        IF((SUM(number_of_session_s_14) > 0 OR SUM(number_of_session_s_16) > 0 ),'yes','no') as has_preventive_vbg
 						FROM (
 						SELECT
 							id_patient,
 							SUM(dgs.topic = 8) AS number_of_session_s_08,
 							SUM(dgs.topic = 10) AS number_of_session_s_10,
 							SUM(dgs.topic = 11) AS number_of_session_s_11,
-							SUM(dgs.topic = 18) AS number_of_session_s_18
+							SUM(dgs.topic = 18) AS number_of_session_s_18,
+                            SUM(dgs.topic = 14) AS number_of_session_s_14,
+							SUM(dgs.topic = 16) AS number_of_session_s_16
 						FROM
 							dream_group_attendance dga
 					LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
@@ -203,6 +207,7 @@ SELECT
 	b.nbre_pres_for_inter,
 	h.nbre_parenting_coupe_present,
 	b.has_comdom_topic,
+ 	b.has_preventive_vbg,
 	d.number_of_condoms_sensibilize,
 	d.number_condoms_sensibilization_date_in_the_interval,
 	d.number_condoms_reception_in_the_interval,
@@ -263,14 +268,17 @@ GROUP BY
 					SELECT
 						xy.id_patient,
 						COUNT(*) AS nbre_pres_for_inter,
-						IF((SUM(number_of_session_s_08) > 0 OR SUM(number_of_session_s_10) > 0 OR SUM(number_of_session_s_11) > 0 OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic
+						IF((SUM(number_of_session_s_08) > 0 OR SUM(number_of_session_s_10) > 0 OR SUM(number_of_session_s_11) > 0 OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic,
+                        IF((SUM(number_of_session_s_14) > 0 OR SUM(number_of_session_s_16) > 0 ),'yes','no') as has_preventive_vbg
 						FROM (
 						SELECT
 							id_patient,
 							SUM(dgs.topic = 8) AS number_of_session_s_08,
 							SUM(dgs.topic = 10) AS number_of_session_s_10,
 							SUM(dgs.topic = 11) AS number_of_session_s_11,
-							SUM(dgs.topic = 18) AS number_of_session_s_18
+							SUM(dgs.topic = 18) AS number_of_session_s_18,
+                            SUM(dgs.topic = 14) AS number_of_session_s_14,
+							SUM(dgs.topic = 16) AS number_of_session_s_16
 						FROM
 							dream_group_attendance dga
 					LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
@@ -376,6 +384,7 @@ ua_served = agyw_served[~agyw_served.id_patient.isin(
 
 actif_served.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_served.has_comdom_topic.fillna('no', inplace=True)
+actif_served.has_preventive_vbg.fillna('no', inplace=True)
 actif_served.number_of_condoms_sensibilize.fillna(0, inplace=True)
 actif_served.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif_served.number_test_date_in_the_interval.fillna(0, inplace=True)
