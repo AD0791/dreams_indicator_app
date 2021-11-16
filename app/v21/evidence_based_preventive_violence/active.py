@@ -402,7 +402,7 @@ actif_served.number_contraceptive_reception_in_the_interval.fillna(
     0, inplace=True)
 actif_served.number_condoms_sensibilization_date_in_the_interval.fillna(
     0, inplace=True)
-actif_served.test_results.fillna("0,",inlace=True)
+actif_served.test_results.fillna("0,",inplace=True)
 
 
 actif_served.nbre_pres_for_inter = actif_served.nbre_pres_for_inter.astype(

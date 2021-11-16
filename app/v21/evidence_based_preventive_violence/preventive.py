@@ -34,6 +34,10 @@ class Preventive:
     @property
     def who_am_i(self):
         return self.__i_am
+    
+    @property
+    def data_mastersheet(self):
+        return self.__data
 
 
     @property
@@ -57,7 +61,7 @@ class Preventive:
     __PERIOD_DATIM.append("Total")
     __AGE_DATIM = sorted(list(AGYW_ACTIF.age_range.unique())[0:3])
 
-    def datim_agyw_prevI(self):
+    def datim_preventive_violence(self):
         try:
             pivotableI = self.__preventive_violence.rename(
                 columns={"age_range": "Age", "month_in_program_range": "Time"})
