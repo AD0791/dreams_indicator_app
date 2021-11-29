@@ -26,6 +26,7 @@ class Set_date(Enum):
 # get the engine to connect and fetch
 engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
 
+# // FIXME sqlalchemy will not run this one
 v21 = open('../v21_script.sql')
 v21_text = text(v21.read())
 v21_data = engine.execute(v21_text).fetchall()
