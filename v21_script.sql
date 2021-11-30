@@ -1,3 +1,7 @@
+
+#set @start_date = '2021-10-01'; 
+#set @end_date = '2021-12-31';
+
 SET @start_date = '2020-10-01'; 
 SET @end_date = '2021-09-30';
 SELECT
