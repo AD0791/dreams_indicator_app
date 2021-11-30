@@ -1,7 +1,5 @@
-set @start_date = '2020-10-01'; 
-set @end_date = '2021-09-30';
-
-
+SET @start_date = '2020-10-01'; 
+SET @end_date = '2021-09-30';
 SELECT
 	a.id_patient,
 	h.id_parenting_group,
@@ -170,4 +168,5 @@ FROM
 	dream_group_attendance dga
 	LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
 WHERE
-	dga.value = 'P' AND dgs.date < @start_date)) past ON past.id_patient = a.id_patient
+	dga.value = 'P' AND dgs.date < @start_date)) past ON past.id_patient = a.id_patient;
+	
