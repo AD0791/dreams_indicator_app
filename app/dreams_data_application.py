@@ -7,6 +7,13 @@ st.cache(lambda _: _datim)
 st.set_page_config(layout="wide")
 
 
+st.sidebar.selectbox(
+"you Can do the following using this Website ",
+("Data Pre Processing using Pandas", "Correcting",'Completing',
+'Creating','Modeling using Sklearn')
+)
+
+
 st.header('Dreams Application Test')
 st.subheader("Let\'s expose the indicator")
 
