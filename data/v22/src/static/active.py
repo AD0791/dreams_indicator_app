@@ -6,7 +6,7 @@ import pandas as pd
 from numpy import int16
 from enum import Enum
 
-from .functions import *
+from functions import *
 
 load_dotenv()
 
