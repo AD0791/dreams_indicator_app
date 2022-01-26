@@ -55,6 +55,20 @@ class LayerServicesData:
         base1519.socioeco_app == "yes")].id_patient.count()
     socioeco_app_2024: int = base2024[(
         base2024.socioeco_app == "yes")].id_patient.count()
+    
+    muso_1014: int = base1014[(
+        base1014.muso == "yes")].id_patient.count()
+    muso_1519: int = base1519[(
+        base1519.muso == "yes")].id_patient.count()
+    muso_2024: int = base2024[(
+        base2024.muso == "yes")].id_patient.count()
+    
+    gardening_1014: int = base1014[(
+        base1014.gardening == "yes")].id_patient.count()
+    gardening_1519: int = base1519[(
+        base1519.gardening == "yes")].id_patient.count()
+    gardening_2024: int = base2024[(
+        base2024.gardening == "yes")].id_patient.count()
     # prep
     prep_1014: int = base1014[(base1014.prep == "yes")].id_patient.count()
     prep_1519: int = base1519[(base1519.prep == "yes")].id_patient.count()
@@ -112,6 +126,8 @@ class LayerServicesElements:
     socioeco: str = "Combination Socio-Economic Approaches"
     prep: str = "PREP"
     contraceptive: str = "Contraceptive-Mix"
+    muso: str = "Muso"
+    gardening: str = "Gardening"
     # primary package
     ps1519: str = "Social Asset Building and Community-based HIV & Violence Prevention & condoms"
     ps2024: str = "Social Asset Building and Community-based HIV & Violence Prevention & condoms"
