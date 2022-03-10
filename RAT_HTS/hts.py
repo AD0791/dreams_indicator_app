@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from pandas import (
     read_sql_query
 )
-
+from numpy import int64
 
 load_dotenv()
 
