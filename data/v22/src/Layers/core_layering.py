@@ -5,11 +5,17 @@ from dataclasses import dataclass
 from sys import path
 path.insert(0, '../static')
 from agyw import AgywPrev
+from pandas import DataFrame
 
 
 DF = TypeVar('pandas.core.frame.DataFrame')
 
 base = AgywPrev().data_dreams_valid
+base_table = base.pivot_table(index='age_range', values='id_patient',columns='departement',aggfunc='count',fill_value=0, margins=True,
+    margins_name = "Total"
+)[:-1]
+base_table = base_table.reset_index().rename_axis(None, axis=1)
+base_table = DataFrame(base_table.to_records(index=False))
 
 
 @dataclass(frozen=True)
