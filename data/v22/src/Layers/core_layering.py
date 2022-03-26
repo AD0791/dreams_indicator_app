@@ -10,6 +10,7 @@ from pandas import DataFrame
 
 DF = TypeVar('pandas.core.frame.DataFrame')
 
+
 base = AgywPrev().data_dreams_valid
 base_table = base.pivot_table(index='age_range', values='id_patient',columns='departement',aggfunc='count',fill_value=0, margins=True,
     margins_name = "Total"
@@ -18,7 +19,7 @@ base_table = base_table.reset_index().rename_axis(None, axis=1)
 base_table = DataFrame(base_table.to_records(index=False))
 
 
-@dataclass(frozen=True)
+@dataclass
 class LayerServicesData:
     """convey the proper services data given for the time"""
     base1014: DF = base[base.age_range == "10-14"]
@@ -107,7 +108,7 @@ class LayerServicesData:
         base2024.parenting == "yes")].id_patient.count()
 
 
-@pdt(frozen=True)
+@pdt
 class LayerServicesElements:
     """ convey the elements for the build of the table"""
     who_am_i: str = "Layering Table of Services"
@@ -137,3 +138,155 @@ class LayerServicesElements:
     # primary package
     ps1519: str = "Social Asset Building and Community-based HIV & Violence Prevention & condoms"
     ps2024: str = "Social Asset Building and Community-based HIV & Violence Prevention & condoms"
+    package: str = "Primary package"
+    
+    
+@dataclass
+class Total(LayerServicesData):
+    @property
+    def package(self):
+        if not self.ps_1014:
+            self.ps_1014 = 0
+        if not self.ps_1519:
+            self.ps_1519 = 0
+        if not self.ps_2024:
+            self.ps_2024 = 0    
+        total = self.ps_1014 + self.ps_1519 + self.ps_2024
+        return total if total else 0
+
+    @property
+    def curriculum(self):
+        if not self.curriculum_1014:
+            self.curriculum_1014 = 0
+        if not self.curriculum_1519:
+            self.curriculum_1519 = 0
+        if not self.curriculum_2024:
+            self.curriculum_2024 = 0  
+        total = self.curriculum_1014 + self.curriculum_1519 + self.curriculum_2024
+        return total if total else 0
+
+    @property
+    def condoms(self):
+        if not self.condom_1014:
+            self.condom_1014 = 0
+        if not self.condom_1519:
+            self.condom_1519 = 0
+        if not self.condom_2024:
+            self.condom_2024 = 0  
+        total = self.condom_1014 + self.condom_1519 + self.condom_2024
+        return total if total else 0
+    
+    @property
+    def hts(self):
+        if not self.hts_1014:
+            self.hts_1014 = 0
+        if not self.hts_1519:
+            self.hts_1519 = 0
+        if not self.hts_2024:
+            self.hts_2024 = 0  
+        total = self.hts_1014 + self.hts_1519 + self.hts_2024
+        return total if total else 0
+    
+    @property
+    def schooling(self):
+        if not self.schooling_1014:
+            self.schooling_1014 = 0
+        if not self.schooling_1519:
+            self.schooling_1519 = 0
+        if not self.schooling_2024:
+            self.schooling_2024 = 0  
+        total = self.schooling_1014 + self.schooling_1519 + self.schooling_2024
+        return total if total else 0
+    
+    @property
+    def gardening(self):
+        if not self.gardening_1014:
+            self.gardening_1014 = 0
+        if not self.gardening_1519:
+            self.gardening_1519 = 0
+        if not self.gardening_2024:
+            self.gardening_2024 = 0  
+        total = self.gardening_1014 + self.gardening_1519 + self.gardening_2024
+        return total if total else 0
+    
+    @property
+    def muso(self):
+        if not self.muso_1014:
+            self.muso_1014 = 0
+        if not self.muso_1519:
+            self.muso_1519 = 0
+        if not self.muso_2024:
+            self.muso_2024 = 0  
+        total = self.muso_1014 + self.muso_1519 + self.muso_2024
+        return total if total else 0
+    
+    @property
+    def socioeco(self):
+        if not self.socioeco_app_1014:
+            self.socioeco_app_1014 = 0
+        if not self.socioeco_app_1519:
+            self.socioeco_app_1519 = 0
+        if not self.socioeco_app_2024:
+            self.socioeco_app_2024 = 0  
+        total = self.socioeco_app_1014 + self.socioeco_app_1519 + self.socioeco_app_2024
+        return total if total else 0
+    
+    @property
+    def contraceptive(self):
+        if not self.contraceptive_1014:
+            self.contraceptive_1014 = 0
+        if not self.contraceptive_1519:
+            self.contraceptive_1519 = 0
+        if not self.contraceptive_2024:
+            self.contraceptive_2024 = 0  
+        total = self.contraceptive_1014 + self.contraceptive_1519 + self.contraceptive_2024
+        return total if total else 0
+    
+    @property
+    def prep(self):
+        if not self.prep_1014:
+            self.prep_1014 = 0
+        if not self.prep_1519:
+            self.prep_1519 = 0
+        if not self.prep_2024:
+            self.prep_2024 = 0  
+        total = self.prep_1014 + self.prep_1519 + self.prep_2024
+        return total if total else 0
+    
+    @property
+    def vbg(self):
+        if not self.vbg_1014:
+            self.vbg_1014 = 0
+        if not self.vbg_1519:
+            self.vbg_1519 = 0
+        if not self.vbg_2024:
+            self.vbg_2024 = 0  
+        total = self.vbg_1014 + self.vbg_1519 + self.vbg_2024
+        return total if total else 0
+    
+    @property
+    def gyneco(self):
+        if not self.gyneco_1014:
+            self.gyneco_1014 = 0
+        if not self.gyneco_1519:
+            self.gyneco_1519 = 0
+        if not self.gyneco_2024:
+            self.gyneco_2024 = 0  
+        total = self.gyneco_1014 + self.gyneco_1519 + self.gyneco_2024
+        return total if total else 0
+    
+    @property
+    def parenting(self):
+        if not self.parenting_1014:
+            self.parenting_1014 = 0
+        if not self.parenting_1519:
+            self.parenting_1519 = 0
+        if not self.parenting_2024:
+            self.parenting_2024 = 0  
+        total = self.parenting_1014 + self.parenting_1519 + self.parenting_2024
+        return total if total else 0
+    
+
+
+
+
