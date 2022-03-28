@@ -17,10 +17,10 @@ DBNAME = config('DBCaris')
 
 
 class Set_date(Enum):
-    period_Qi_start = "2021-04-01"
-    period_Qi_end = "2021-06-30"
-    period_Qj_start = "2021-07-01"
-    period_Qj_end = "2021-09-30"
+    period_Qi_start = "2021-10-01"
+    period_Qi_end = "2021-12-31"
+    period_Qj_start = "2022-01-01"
+    period_Qj_end = "2022-03-31"
 
 
 
@@ -103,12 +103,16 @@ FROM
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
+        (dhi.condom_sensibilization_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
+            OR (dhi.contraceptive_reception_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
+            OR (dhi.test_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
             OR (dhi.condoms_reception_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
             OR (dhi.vbg_treatment_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
             OR (dhi.gynecological_care_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
             OR (dhi.prep_initiation_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
-            OR (dhi.has_been_sensibilize_for_condom = 1)) UNION (SELECT 
+            OR (dhi.has_been_sensibilize_for_condom = 1
+            AND ((dhi.condom_sensibilization_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
+            OR (dhi.condoms_reception_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')))) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
@@ -317,12 +321,16 @@ FROM
     FROM
         dream_hivinfos dhi
     WHERE
-        (dhi.test_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
+        (dhi.condom_sensibilization_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
+            OR (dhi.contraceptive_reception_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
+            OR (dhi.test_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
             OR (dhi.condoms_reception_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
             OR (dhi.vbg_treatment_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
             OR (dhi.gynecological_care_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
             OR (dhi.prep_initiation_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
-            OR (dhi.has_been_sensibilize_for_condom = 1)) UNION (SELECT 
+            OR (dhi.has_been_sensibilize_for_condom = 1
+            AND ((dhi.condom_sensibilization_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
+            OR (dhi.condoms_reception_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')))) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
@@ -470,408 +478,408 @@ agyw_served_Qj = read_sql_query(query_Qj_period, engine, parse_dates=True)
 engine.dispose()
 
 
-actif_in_Q3 = agyw_served_Qi
-actif_in_Q4 = agyw_served_Qj
+actif_in_Q1 = agyw_served_Qi
+actif_in_Q2 = agyw_served_Qj
 
-actif_in_Q3Q4 = actif_in_Q3[actif_in_Q3.id_patient.isin(actif_in_Q4.id_patient)]
-actif_in_Q3strict = actif_in_Q3[~actif_in_Q3.id_patient.isin(actif_in_Q4.id_patient)]
-actif_in_Q4strict = actif_in_Q4[~actif_in_Q4.id_patient.isin(actif_in_Q3.id_patient)]
+actif_in_Q1Q2 = actif_in_Q1[actif_in_Q1.id_patient.isin(actif_in_Q2.id_patient)]
+actif_in_Q1strict = actif_in_Q1[~actif_in_Q1.id_patient.isin(actif_in_Q2.id_patient)]
+actif_in_Q2strict = actif_in_Q2[~actif_in_Q2.id_patient.isin(actif_in_Q1.id_patient)]
 
 
 #################################################################
 #################################
 #################################
 
-# Q3 strict
+# Q1 strict
 
-actif_in_Q3strict.nbre_pres_for_inter.fillna(0, inplace=True)
-actif_in_Q3strict.has_comdom_topic.fillna('no', inplace=True)
-actif_in_Q3strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q3strict.number_condoms_reception_in_the_interval.fillna(
+actif_in_Q1strict.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q1strict.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q1strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q1strict.number_condoms_reception_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3strict.number_test_date_in_the_interval.fillna(0, inplace=True)
-actif_in_Q3strict.number_gynecological_care_date_in_the_interval.fillna(
+actif_in_Q1strict.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1strict.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3strict.number_vbg_treatment_date_in_the_interval.fillna(
+actif_in_Q1strict.number_vbg_treatment_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3strict.number_prep_initiation_date_in_the_interval.fillna(
+actif_in_Q1strict.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q1strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q3strict.nbre_pres_for_inter = actif_in_Q3strict.nbre_pres_for_inter.astype(
+actif_in_Q1strict.nbre_pres_for_inter = actif_in_Q1strict.nbre_pres_for_inter.astype(
     int16)
-actif_in_Q3strict.number_of_condoms_sensibilize = actif_in_Q3strict.number_of_condoms_sensibilize.astype(
+actif_in_Q1strict.number_of_condoms_sensibilize = actif_in_Q1strict.number_of_condoms_sensibilize.astype(
     int16)
-actif_in_Q3strict.number_condoms_reception_in_the_interval = actif_in_Q3strict.number_condoms_reception_in_the_interval.astype(
+actif_in_Q1strict.number_condoms_reception_in_the_interval = actif_in_Q1strict.number_condoms_reception_in_the_interval.astype(
     int16)
-actif_in_Q3strict.number_test_date_in_the_interval = actif_in_Q3strict.number_test_date_in_the_interval.astype(
+actif_in_Q1strict.number_test_date_in_the_interval = actif_in_Q1strict.number_test_date_in_the_interval.astype(
     int16)
-actif_in_Q3strict.number_gynecological_care_date_in_the_interval = actif_in_Q3strict.number_gynecological_care_date_in_the_interval.astype(
+actif_in_Q1strict.number_gynecological_care_date_in_the_interval = actif_in_Q1strict.number_gynecological_care_date_in_the_interval.astype(
     int16)
-actif_in_Q3strict.number_vbg_treatment_date_in_the_interval = actif_in_Q3strict.number_vbg_treatment_date_in_the_interval.astype(
+actif_in_Q1strict.number_vbg_treatment_date_in_the_interval = actif_in_Q1strict.number_vbg_treatment_date_in_the_interval.astype(
     int16)
-actif_in_Q3strict.number_prep_initiation_date_in_the_interval = actif_in_Q3strict.number_prep_initiation_date_in_the_interval.astype(
+actif_in_Q1strict.number_prep_initiation_date_in_the_interval = actif_in_Q1strict.number_prep_initiation_date_in_the_interval.astype(
     int16)
-actif_in_Q3strict.nbre_parenting_coupe_present = actif_in_Q3strict.nbre_parenting_coupe_present.astype(
+actif_in_Q1strict.nbre_parenting_coupe_present = actif_in_Q1strict.nbre_parenting_coupe_present.astype(
     int16)
 
-actif_in_Q3strict['parenting_detailed'] = actif_in_Q3strict.nbre_parenting_coupe_present.map(
+actif_in_Q1strict['parenting_detailed'] = actif_in_Q1strict.nbre_parenting_coupe_present.map(
     parenting_detailed)
-actif_in_Q3strict['parenting'] = actif_in_Q3strict.nbre_parenting_coupe_present.map(
+actif_in_Q1strict['parenting'] = actif_in_Q1strict.nbre_parenting_coupe_present.map(
     parenting)
-actif_in_Q3strict['curriculum_detailed'] = actif_in_Q3strict.nbre_pres_for_inter.map(
+actif_in_Q1strict['curriculum_detailed'] = actif_in_Q1strict.nbre_pres_for_inter.map(
     curriculum_detailed)
-actif_in_Q3strict['curriculum'] = actif_in_Q3strict.nbre_pres_for_inter.map(
+actif_in_Q1strict['curriculum'] = actif_in_Q1strict.nbre_pres_for_inter.map(
     curriculum)
-actif_in_Q3strict['condom'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['condom'] = actif_in_Q1strict.apply(
     lambda df: condom(df), axis=1)
-actif_in_Q3strict['hts'] = actif_in_Q3strict.number_test_date_in_the_interval.map(
+actif_in_Q1strict['hts'] = actif_in_Q1strict.number_test_date_in_the_interval.map(
     hts)
-actif_in_Q3strict['post_violence_care'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['post_violence_care'] = actif_in_Q1strict.apply(
     lambda df: postcare(df), axis=1)
-actif_in_Q3strict['socioeco_app'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['socioeco_app'] = actif_in_Q1strict.apply(
     lambda df: socioeco(df), axis=1)
-actif_in_Q3strict['prep'] = actif_in_Q3strict.number_prep_initiation_date_in_the_interval.map(
+actif_in_Q1strict['prep'] = actif_in_Q1strict.number_prep_initiation_date_in_the_interval.map(
     prep)
 
-actif_in_Q3strict['ps_1014'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['ps_1014'] = actif_in_Q1strict.apply(
     lambda df: prim_1014(df), axis=1)
-actif_in_Q3strict['ps_1519'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['ps_1519'] = actif_in_Q1strict.apply(
     lambda df: prim_1519(df), axis=1)
-actif_in_Q3strict['ps_2024'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['ps_2024'] = actif_in_Q1strict.apply(
     lambda df: prim_2024(df), axis=1)
-actif_in_Q3strict['secondary_1014'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['secondary_1014'] = actif_in_Q1strict.apply(
     lambda df: sec_1014(df), axis=1)
-actif_in_Q3strict['secondary_1519'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['secondary_1519'] = actif_in_Q1strict.apply(
     lambda df: sec_1519(df), axis=1)
-actif_in_Q3strict['secondary_2024'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['secondary_2024'] = actif_in_Q1strict.apply(
     lambda df: sec_2024(df), axis=1)
-actif_in_Q3strict['complete_1014'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['complete_1014'] = actif_in_Q1strict.apply(
     lambda df: comp_1014(df), axis=1)
-actif_in_Q3strict['complete_1519'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['complete_1519'] = actif_in_Q1strict.apply(
     lambda df: comp_1519(df), axis=1)
-actif_in_Q3strict['complete_2024'] = actif_in_Q3strict.apply(
+actif_in_Q1strict['complete_2024'] = actif_in_Q1strict.apply(
     lambda df: comp_2024(df), axis=1)
 
 #############################################
-# Q4 strict
+# Q2 strict
 
-actif_in_Q4strict.nbre_pres_for_inter.fillna(0, inplace=True)
-actif_in_Q4strict.has_comdom_topic.fillna('no', inplace=True)
-actif_in_Q4strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q4strict.number_condoms_reception_in_the_interval.fillna(
+actif_in_Q2strict.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q2strict.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q2strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q2strict.number_condoms_reception_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4strict.number_test_date_in_the_interval.fillna(0, inplace=True)
-actif_in_Q4strict.number_gynecological_care_date_in_the_interval.fillna(
+actif_in_Q2strict.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q2strict.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4strict.number_vbg_treatment_date_in_the_interval.fillna(
+actif_in_Q2strict.number_vbg_treatment_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4strict.number_prep_initiation_date_in_the_interval.fillna(
+actif_in_Q2strict.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q2strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q4strict.nbre_pres_for_inter = actif_in_Q4strict.nbre_pres_for_inter.astype(
+actif_in_Q2strict.nbre_pres_for_inter = actif_in_Q2strict.nbre_pres_for_inter.astype(
     int16)
-actif_in_Q4strict.number_of_condoms_sensibilize = actif_in_Q4strict.number_of_condoms_sensibilize.astype(
+actif_in_Q2strict.number_of_condoms_sensibilize = actif_in_Q2strict.number_of_condoms_sensibilize.astype(
     int16)
-actif_in_Q4strict.number_condoms_reception_in_the_interval = actif_in_Q4strict.number_condoms_reception_in_the_interval.astype(
+actif_in_Q2strict.number_condoms_reception_in_the_interval = actif_in_Q2strict.number_condoms_reception_in_the_interval.astype(
     int16)
-actif_in_Q4strict.number_test_date_in_the_interval = actif_in_Q4strict.number_test_date_in_the_interval.astype(
+actif_in_Q2strict.number_test_date_in_the_interval = actif_in_Q2strict.number_test_date_in_the_interval.astype(
     int16)
-actif_in_Q4strict.number_gynecological_care_date_in_the_interval = actif_in_Q4strict.number_gynecological_care_date_in_the_interval.astype(
+actif_in_Q2strict.number_gynecological_care_date_in_the_interval = actif_in_Q2strict.number_gynecological_care_date_in_the_interval.astype(
     int16)
-actif_in_Q4strict.number_vbg_treatment_date_in_the_interval = actif_in_Q4strict.number_vbg_treatment_date_in_the_interval.astype(
+actif_in_Q2strict.number_vbg_treatment_date_in_the_interval = actif_in_Q2strict.number_vbg_treatment_date_in_the_interval.astype(
     int16)
-actif_in_Q4strict.number_prep_initiation_date_in_the_interval = actif_in_Q4strict.number_prep_initiation_date_in_the_interval.astype(
+actif_in_Q2strict.number_prep_initiation_date_in_the_interval = actif_in_Q2strict.number_prep_initiation_date_in_the_interval.astype(
     int16)
-actif_in_Q4strict.nbre_parenting_coupe_present = actif_in_Q4strict.nbre_parenting_coupe_present.astype(
+actif_in_Q2strict.nbre_parenting_coupe_present = actif_in_Q2strict.nbre_parenting_coupe_present.astype(
     int16)
 
 # services
-actif_in_Q4strict['parenting_detailed'] = actif_in_Q4strict.nbre_parenting_coupe_present.map(
+actif_in_Q2strict['parenting_detailed'] = actif_in_Q2strict.nbre_parenting_coupe_present.map(
     parenting_detailed)
-actif_in_Q4strict['parenting'] = actif_in_Q4strict.nbre_parenting_coupe_present.map(
+actif_in_Q2strict['parenting'] = actif_in_Q2strict.nbre_parenting_coupe_present.map(
     parenting)
-actif_in_Q4strict['curriculum_detailed'] = actif_in_Q4strict.nbre_pres_for_inter.map(
+actif_in_Q2strict['curriculum_detailed'] = actif_in_Q2strict.nbre_pres_for_inter.map(
     curriculum_detailed)
-actif_in_Q4strict['curriculum'] = actif_in_Q4strict.nbre_pres_for_inter.map(
+actif_in_Q2strict['curriculum'] = actif_in_Q2strict.nbre_pres_for_inter.map(
     curriculum)
-actif_in_Q4strict['condom'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['condom'] = actif_in_Q2strict.apply(
     lambda df: condom(df), axis=1)
-actif_in_Q4strict['hts'] = actif_in_Q4strict.number_test_date_in_the_interval.map(
+actif_in_Q2strict['hts'] = actif_in_Q2strict.number_test_date_in_the_interval.map(
     hts)
-actif_in_Q4strict['post_violence_care'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['post_violence_care'] = actif_in_Q2strict.apply(
     lambda df: postcare(df), axis=1)
-actif_in_Q4strict['socioeco_app'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['socioeco_app'] = actif_in_Q2strict.apply(
     lambda df: socioeco(df), axis=1)
-actif_in_Q4strict['prep'] = actif_in_Q4strict.number_prep_initiation_date_in_the_interval.map(
+actif_in_Q2strict['prep'] = actif_in_Q2strict.number_prep_initiation_date_in_the_interval.map(
     prep)
 
-actif_in_Q4strict['ps_1014'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['ps_1014'] = actif_in_Q2strict.apply(
     lambda df: prim_1014(df), axis=1)
-actif_in_Q4strict['ps_1519'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['ps_1519'] = actif_in_Q2strict.apply(
     lambda df: prim_1519(df), axis=1)
-actif_in_Q4strict['ps_2024'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['ps_2024'] = actif_in_Q2strict.apply(
     lambda df: prim_2024(df), axis=1)
-actif_in_Q4strict['secondary_1014'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['secondary_1014'] = actif_in_Q2strict.apply(
     lambda df: sec_1014(df), axis=1)
-actif_in_Q4strict['secondary_1519'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['secondary_1519'] = actif_in_Q2strict.apply(
     lambda df: sec_1519(df), axis=1)
-actif_in_Q4strict['secondary_2024'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['secondary_2024'] = actif_in_Q2strict.apply(
     lambda df: sec_2024(df), axis=1)
-actif_in_Q4strict['complete_1014'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['complete_1014'] = actif_in_Q2strict.apply(
     lambda df: comp_1014(df), axis=1)
-actif_in_Q4strict['complete_1519'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['complete_1519'] = actif_in_Q2strict.apply(
     lambda df: comp_1519(df), axis=1)
-actif_in_Q4strict['complete_2024'] = actif_in_Q4strict.apply(
+actif_in_Q2strict['complete_2024'] = actif_in_Q2strict.apply(
     lambda df: comp_2024(df), axis=1)
 
 
 ##################################
-# Q3Q4
+# Q1Q2
 
-actif_in_Q3Q4.nbre_pres_for_inter.fillna(0, inplace=True)
-actif_in_Q3Q4.has_comdom_topic.fillna('no', inplace=True)
-actif_in_Q3Q4.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q3Q4.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
-actif_in_Q3Q4.number_test_date_in_the_interval.fillna(0, inplace=True)
-actif_in_Q3Q4.number_gynecological_care_date_in_the_interval.fillna(
+actif_in_Q1Q2.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q1Q2.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q1Q2.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q1Q2.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1Q2.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1Q2.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
-actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.fillna(
+actif_in_Q1Q2.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1Q2.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3Q4.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q1Q2.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q3Q4.nbre_pres_for_inter = actif_in_Q3Q4.nbre_pres_for_inter.astype(
+actif_in_Q1Q2.nbre_pres_for_inter = actif_in_Q1Q2.nbre_pres_for_inter.astype(
     int16)
-actif_in_Q3Q4.number_of_condoms_sensibilize = actif_in_Q3Q4.number_of_condoms_sensibilize.astype(
+actif_in_Q1Q2.number_of_condoms_sensibilize = actif_in_Q1Q2.number_of_condoms_sensibilize.astype(
     int16)
-actif_in_Q3Q4.number_condoms_reception_in_the_interval = actif_in_Q3Q4.number_condoms_reception_in_the_interval.astype(
+actif_in_Q1Q2.number_condoms_reception_in_the_interval = actif_in_Q1Q2.number_condoms_reception_in_the_interval.astype(
     int16)
-actif_in_Q3Q4.number_test_date_in_the_interval = actif_in_Q3Q4.number_test_date_in_the_interval.astype(
+actif_in_Q1Q2.number_test_date_in_the_interval = actif_in_Q1Q2.number_test_date_in_the_interval.astype(
     int16)
-actif_in_Q3Q4.number_gynecological_care_date_in_the_interval = actif_in_Q3Q4.number_gynecological_care_date_in_the_interval.astype(
+actif_in_Q1Q2.number_gynecological_care_date_in_the_interval = actif_in_Q1Q2.number_gynecological_care_date_in_the_interval.astype(
     int16)
-actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval = actif_in_Q3Q4.number_vbg_treatment_date_in_the_interval.astype(
+actif_in_Q1Q2.number_vbg_treatment_date_in_the_interval = actif_in_Q1Q2.number_vbg_treatment_date_in_the_interval.astype(
     int16)
-actif_in_Q3Q4.number_prep_initiation_date_in_the_interval = actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.astype(
+actif_in_Q1Q2.number_prep_initiation_date_in_the_interval = actif_in_Q1Q2.number_prep_initiation_date_in_the_interval.astype(
     int16)
-actif_in_Q3Q4.nbre_parenting_coupe_present = actif_in_Q3Q4.nbre_parenting_coupe_present.astype(
+actif_in_Q1Q2.nbre_parenting_coupe_present = actif_in_Q1Q2.nbre_parenting_coupe_present.astype(
     int16)
 
 
-actif_in_Q3Q4['parenting_detailed'] = actif_in_Q3Q4.nbre_parenting_coupe_present.map(
+actif_in_Q1Q2['parenting_detailed'] = actif_in_Q1Q2.nbre_parenting_coupe_present.map(
     parenting_detailed)
-actif_in_Q3Q4['parenting'] = actif_in_Q3Q4.nbre_parenting_coupe_present.map(
+actif_in_Q1Q2['parenting'] = actif_in_Q1Q2.nbre_parenting_coupe_present.map(
     parenting)
-actif_in_Q3Q4['curriculum_detailed'] = actif_in_Q3Q4.nbre_pres_for_inter.map(
+actif_in_Q1Q2['curriculum_detailed'] = actif_in_Q1Q2.nbre_pres_for_inter.map(
     curriculum_detailed)
-actif_in_Q3Q4['curriculum'] = actif_in_Q3Q4.nbre_pres_for_inter.map(curriculum)
-actif_in_Q3Q4['condom'] = actif_in_Q3Q4.apply(lambda df: condom(df), axis=1)
-actif_in_Q3Q4['hts'] = actif_in_Q3Q4.number_test_date_in_the_interval.map(hts)
-actif_in_Q3Q4['post_violence_care'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['curriculum'] = actif_in_Q1Q2.nbre_pres_for_inter.map(curriculum)
+actif_in_Q1Q2['condom'] = actif_in_Q1Q2.apply(lambda df: condom(df), axis=1)
+actif_in_Q1Q2['hts'] = actif_in_Q1Q2.number_test_date_in_the_interval.map(hts)
+actif_in_Q1Q2['post_violence_care'] = actif_in_Q1Q2.apply(
     lambda df: postcare(df), axis=1)
-actif_in_Q3Q4['socioeco_app'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['socioeco_app'] = actif_in_Q1Q2.apply(
     lambda df: socioeco(df), axis=1)
-actif_in_Q3Q4['prep'] = actif_in_Q3Q4.number_prep_initiation_date_in_the_interval.map(
+actif_in_Q1Q2['prep'] = actif_in_Q1Q2.number_prep_initiation_date_in_the_interval.map(
     prep)
 
-actif_in_Q3Q4['ps_1014'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['ps_1014'] = actif_in_Q1Q2.apply(
     lambda df: prim_1014(df), axis=1)
-actif_in_Q3Q4['ps_1519'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['ps_1519'] = actif_in_Q1Q2.apply(
     lambda df: prim_1519(df), axis=1)
-actif_in_Q3Q4['ps_2024'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['ps_2024'] = actif_in_Q1Q2.apply(
     lambda df: prim_2024(df), axis=1)
-actif_in_Q3Q4['secondary_1014'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['secondary_1014'] = actif_in_Q1Q2.apply(
     lambda df: sec_1014(df), axis=1)
-actif_in_Q3Q4['secondary_1519'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['secondary_1519'] = actif_in_Q1Q2.apply(
     lambda df: sec_1519(df), axis=1)
-actif_in_Q3Q4['secondary_2024'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['secondary_2024'] = actif_in_Q1Q2.apply(
     lambda df: sec_2024(df), axis=1)
-actif_in_Q3Q4['complete_1014'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['complete_1014'] = actif_in_Q1Q2.apply(
     lambda df: comp_1014(df), axis=1)
-actif_in_Q3Q4['complete_1519'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['complete_1519'] = actif_in_Q1Q2.apply(
     lambda df: comp_1519(df), axis=1)
-actif_in_Q3Q4['complete_2024'] = actif_in_Q3Q4.apply(
+actif_in_Q1Q2['complete_2024'] = actif_in_Q1Q2.apply(
     lambda df: comp_2024(df), axis=1)
 
 
 ##### complete and enrolled {merge}
 
-actif_in_Q4strict.date_interview = to_datetime(actif_in_Q4strict.date_interview)
-actif_in_Q3strict.date_interview = to_datetime(actif_in_Q3strict.date_interview)
-actif_in_Q3Q4.date_interview= to_datetime(actif_in_Q3Q4.date_interview)
+actif_in_Q2strict.date_interview = to_datetime(actif_in_Q2strict.date_interview)
+actif_in_Q1strict.date_interview = to_datetime(actif_in_Q1strict.date_interview)
+actif_in_Q1Q2.date_interview= to_datetime(actif_in_Q1Q2.date_interview)
 
-actif_in_Q3strict['complete_at_least']= actif_in_Q3strict.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q4strict['complete_at_least'] = actif_in_Q4strict.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q3Q4['complete_at_least']= actif_in_Q3Q4.apply(lambda df: complete_at_least(df),axis=1)
-
-
-actif_in_Q3strict['isEnrolledQ4']= actif_in_Q3strict.date_interview.map(isEnrolledQ4)
-actif_in_Q4strict['isEnrolledQ4'] = actif_in_Q4strict.date_interview.map(isEnrolledQ4)
-actif_in_Q3Q4['isEnrolledQ4']= actif_in_Q3Q4.date_interview.map(isEnrolledQ4)
-
-################################ for Q3 and Q4
+actif_in_Q1strict['complete_at_least']= actif_in_Q1strict.apply(lambda df: complete_at_least(df),axis=1)
+actif_in_Q2strict['complete_at_least'] = actif_in_Q2strict.apply(lambda df: complete_at_least(df),axis=1)
+actif_in_Q1Q2['complete_at_least']= actif_in_Q1Q2.apply(lambda df: complete_at_least(df),axis=1)
 
 
+actif_in_Q1strict['isEnrolledQ2']= actif_in_Q1strict.date_interview.map(isEnrolledQ2)
+actif_in_Q2strict['isEnrolledQ2'] = actif_in_Q2strict.date_interview.map(isEnrolledQ2)
+actif_in_Q1Q2['isEnrolledQ2']= actif_in_Q1Q2.date_interview.map(isEnrolledQ2)
 
-# Q3 
+################################ for Q1 and Q2
 
-actif_in_Q3.nbre_pres_for_inter.fillna(0, inplace=True)
-actif_in_Q3.has_comdom_topic.fillna('no', inplace=True)
-actif_in_Q3.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q3.number_condoms_reception_in_the_interval.fillna(
+
+
+# Q1 
+
+actif_in_Q1.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q1.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q1.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q1.number_condoms_reception_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3.number_test_date_in_the_interval.fillna(0, inplace=True)
-actif_in_Q3.number_gynecological_care_date_in_the_interval.fillna(
+actif_in_Q1.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3.number_vbg_treatment_date_in_the_interval.fillna(
+actif_in_Q1.number_vbg_treatment_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3.number_prep_initiation_date_in_the_interval.fillna(
+actif_in_Q1.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q3.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q1.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q3.nbre_pres_for_inter = actif_in_Q3.nbre_pres_for_inter.astype(
+actif_in_Q1.nbre_pres_for_inter = actif_in_Q1.nbre_pres_for_inter.astype(
     int16)
-actif_in_Q3.number_of_condoms_sensibilize = actif_in_Q3.number_of_condoms_sensibilize.astype(
+actif_in_Q1.number_of_condoms_sensibilize = actif_in_Q1.number_of_condoms_sensibilize.astype(
     int16)
-actif_in_Q3.number_condoms_reception_in_the_interval = actif_in_Q3.number_condoms_reception_in_the_interval.astype(
+actif_in_Q1.number_condoms_reception_in_the_interval = actif_in_Q1.number_condoms_reception_in_the_interval.astype(
     int16)
-actif_in_Q3.number_test_date_in_the_interval = actif_in_Q3.number_test_date_in_the_interval.astype(
+actif_in_Q1.number_test_date_in_the_interval = actif_in_Q1.number_test_date_in_the_interval.astype(
     int16)
-actif_in_Q3.number_gynecological_care_date_in_the_interval = actif_in_Q3.number_gynecological_care_date_in_the_interval.astype(
+actif_in_Q1.number_gynecological_care_date_in_the_interval = actif_in_Q1.number_gynecological_care_date_in_the_interval.astype(
     int16)
-actif_in_Q3.number_vbg_treatment_date_in_the_interval = actif_in_Q3.number_vbg_treatment_date_in_the_interval.astype(
+actif_in_Q1.number_vbg_treatment_date_in_the_interval = actif_in_Q1.number_vbg_treatment_date_in_the_interval.astype(
     int16)
-actif_in_Q3.number_prep_initiation_date_in_the_interval = actif_in_Q3.number_prep_initiation_date_in_the_interval.astype(
+actif_in_Q1.number_prep_initiation_date_in_the_interval = actif_in_Q1.number_prep_initiation_date_in_the_interval.astype(
     int16)
-actif_in_Q3.nbre_parenting_coupe_present = actif_in_Q3.nbre_parenting_coupe_present.astype(
+actif_in_Q1.nbre_parenting_coupe_present = actif_in_Q1.nbre_parenting_coupe_present.astype(
     int16)
 
-actif_in_Q3['parenting_detailed'] = actif_in_Q3.nbre_parenting_coupe_present.map(
+actif_in_Q1['parenting_detailed'] = actif_in_Q1.nbre_parenting_coupe_present.map(
     parenting_detailed)
-actif_in_Q3['parenting'] = actif_in_Q3.nbre_parenting_coupe_present.map(
+actif_in_Q1['parenting'] = actif_in_Q1.nbre_parenting_coupe_present.map(
     parenting)
-actif_in_Q3['curriculum_detailed'] = actif_in_Q3.nbre_pres_for_inter.map(
+actif_in_Q1['curriculum_detailed'] = actif_in_Q1.nbre_pres_for_inter.map(
     curriculum_detailed)
-actif_in_Q3['curriculum'] = actif_in_Q3.nbre_pres_for_inter.map(
+actif_in_Q1['curriculum'] = actif_in_Q1.nbre_pres_for_inter.map(
     curriculum)
-actif_in_Q3['condom'] = actif_in_Q3.apply(
+actif_in_Q1['condom'] = actif_in_Q1.apply(
     lambda df: condom(df), axis=1)
-actif_in_Q3['hts'] = actif_in_Q3.number_test_date_in_the_interval.map(
+actif_in_Q1['hts'] = actif_in_Q1.number_test_date_in_the_interval.map(
     hts)
-actif_in_Q3['post_violence_care'] = actif_in_Q3.apply(
+actif_in_Q1['post_violence_care'] = actif_in_Q1.apply(
     lambda df: postcare(df), axis=1)
-actif_in_Q3['socioeco_app'] = actif_in_Q3.apply(
+actif_in_Q1['socioeco_app'] = actif_in_Q1.apply(
     lambda df: socioeco(df), axis=1)
-actif_in_Q3['prep'] = actif_in_Q3.number_prep_initiation_date_in_the_interval.map(
+actif_in_Q1['prep'] = actif_in_Q1.number_prep_initiation_date_in_the_interval.map(
     prep)
 
-actif_in_Q3['ps_1014'] = actif_in_Q3.apply(
+actif_in_Q1['ps_1014'] = actif_in_Q1.apply(
     lambda df: prim_1014(df), axis=1)
-actif_in_Q3['ps_1519'] = actif_in_Q3.apply(
+actif_in_Q1['ps_1519'] = actif_in_Q1.apply(
     lambda df: prim_1519(df), axis=1)
-actif_in_Q3['ps_2024'] = actif_in_Q3.apply(
+actif_in_Q1['ps_2024'] = actif_in_Q1.apply(
     lambda df: prim_2024(df), axis=1)
-actif_in_Q3['secondary_1014'] = actif_in_Q3.apply(
+actif_in_Q1['secondary_1014'] = actif_in_Q1.apply(
     lambda df: sec_1014(df), axis=1)
-actif_in_Q3['secondary_1519'] = actif_in_Q3.apply(
+actif_in_Q1['secondary_1519'] = actif_in_Q1.apply(
     lambda df: sec_1519(df), axis=1)
-actif_in_Q3['secondary_2024'] = actif_in_Q3.apply(
+actif_in_Q1['secondary_2024'] = actif_in_Q1.apply(
     lambda df: sec_2024(df), axis=1)
-actif_in_Q3['complete_1014'] = actif_in_Q3.apply(
+actif_in_Q1['complete_1014'] = actif_in_Q1.apply(
     lambda df: comp_1014(df), axis=1)
-actif_in_Q3['complete_1519'] = actif_in_Q3.apply(
+actif_in_Q1['complete_1519'] = actif_in_Q1.apply(
     lambda df: comp_1519(df), axis=1)
-actif_in_Q3['complete_2024'] = actif_in_Q3.apply(
+actif_in_Q1['complete_2024'] = actif_in_Q1.apply(
     lambda df: comp_2024(df), axis=1)
 
 #############################################
-# Q4 
+# Q2 
 
-actif_in_Q4.nbre_pres_for_inter.fillna(0, inplace=True)
-actif_in_Q4.has_comdom_topic.fillna('no', inplace=True)
-actif_in_Q4.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q4.number_condoms_reception_in_the_interval.fillna(
+actif_in_Q2.nbre_pres_for_inter.fillna(0, inplace=True)
+actif_in_Q2.has_comdom_topic.fillna('no', inplace=True)
+actif_in_Q2.number_of_condoms_sensibilize.fillna(0, inplace=True)
+actif_in_Q2.number_condoms_reception_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4.number_test_date_in_the_interval.fillna(0, inplace=True)
-actif_in_Q4.number_gynecological_care_date_in_the_interval.fillna(
+actif_in_Q2.number_test_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q2.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4.number_vbg_treatment_date_in_the_interval.fillna(
+actif_in_Q2.number_vbg_treatment_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4.number_prep_initiation_date_in_the_interval.fillna(
+actif_in_Q2.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q4.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q2.nbre_parenting_coupe_present.fillna(0, inplace=True)
 
 
-actif_in_Q4.nbre_pres_for_inter = actif_in_Q4.nbre_pres_for_inter.astype(
+actif_in_Q2.nbre_pres_for_inter = actif_in_Q2.nbre_pres_for_inter.astype(
     int16)
-actif_in_Q4.number_of_condoms_sensibilize = actif_in_Q4.number_of_condoms_sensibilize.astype(
+actif_in_Q2.number_of_condoms_sensibilize = actif_in_Q2.number_of_condoms_sensibilize.astype(
     int16)
-actif_in_Q4.number_condoms_reception_in_the_interval = actif_in_Q4.number_condoms_reception_in_the_interval.astype(
+actif_in_Q2.number_condoms_reception_in_the_interval = actif_in_Q2.number_condoms_reception_in_the_interval.astype(
     int16)
-actif_in_Q4.number_test_date_in_the_interval = actif_in_Q4.number_test_date_in_the_interval.astype(
+actif_in_Q2.number_test_date_in_the_interval = actif_in_Q2.number_test_date_in_the_interval.astype(
     int16)
-actif_in_Q4.number_gynecological_care_date_in_the_interval = actif_in_Q4.number_gynecological_care_date_in_the_interval.astype(
+actif_in_Q2.number_gynecological_care_date_in_the_interval = actif_in_Q2.number_gynecological_care_date_in_the_interval.astype(
     int16)
-actif_in_Q4.number_vbg_treatment_date_in_the_interval = actif_in_Q4.number_vbg_treatment_date_in_the_interval.astype(
+actif_in_Q2.number_vbg_treatment_date_in_the_interval = actif_in_Q2.number_vbg_treatment_date_in_the_interval.astype(
     int16)
-actif_in_Q4.number_prep_initiation_date_in_the_interval = actif_in_Q4.number_prep_initiation_date_in_the_interval.astype(
+actif_in_Q2.number_prep_initiation_date_in_the_interval = actif_in_Q2.number_prep_initiation_date_in_the_interval.astype(
     int16)
-actif_in_Q4.nbre_parenting_coupe_present = actif_in_Q4.nbre_parenting_coupe_present.astype(
+actif_in_Q2.nbre_parenting_coupe_present = actif_in_Q2.nbre_parenting_coupe_present.astype(
     int16)
 
 # services
-actif_in_Q4['parenting_detailed'] = actif_in_Q4.nbre_parenting_coupe_present.map(
+actif_in_Q2['parenting_detailed'] = actif_in_Q2.nbre_parenting_coupe_present.map(
     parenting_detailed)
-actif_in_Q4['parenting'] = actif_in_Q4.nbre_parenting_coupe_present.map(
+actif_in_Q2['parenting'] = actif_in_Q2.nbre_parenting_coupe_present.map(
     parenting)
-actif_in_Q4['curriculum_detailed'] = actif_in_Q4.nbre_pres_for_inter.map(
+actif_in_Q2['curriculum_detailed'] = actif_in_Q2.nbre_pres_for_inter.map(
     curriculum_detailed)
-actif_in_Q4['curriculum'] = actif_in_Q4.nbre_pres_for_inter.map(
+actif_in_Q2['curriculum'] = actif_in_Q2.nbre_pres_for_inter.map(
     curriculum)
-actif_in_Q4['condom'] = actif_in_Q4.apply(
+actif_in_Q2['condom'] = actif_in_Q2.apply(
     lambda df: condom(df), axis=1)
-actif_in_Q4['hts'] = actif_in_Q4.number_test_date_in_the_interval.map(
+actif_in_Q2['hts'] = actif_in_Q2.number_test_date_in_the_interval.map(
     hts)
-actif_in_Q4['post_violence_care'] = actif_in_Q4.apply(
+actif_in_Q2['post_violence_care'] = actif_in_Q2.apply(
     lambda df: postcare(df), axis=1)
-actif_in_Q4['socioeco_app'] = actif_in_Q4.apply(
+actif_in_Q2['socioeco_app'] = actif_in_Q2.apply(
     lambda df: socioeco(df), axis=1)
-actif_in_Q4['prep'] = actif_in_Q4.number_prep_initiation_date_in_the_interval.map(
+actif_in_Q2['prep'] = actif_in_Q2.number_prep_initiation_date_in_the_interval.map(
     prep)
 
-actif_in_Q4['ps_1014'] = actif_in_Q4.apply(
+actif_in_Q2['ps_1014'] = actif_in_Q2.apply(
     lambda df: prim_1014(df), axis=1)
-actif_in_Q4['ps_1519'] = actif_in_Q4.apply(
+actif_in_Q2['ps_1519'] = actif_in_Q2.apply(
     lambda df: prim_1519(df), axis=1)
-actif_in_Q4['ps_2024'] = actif_in_Q4.apply(
+actif_in_Q2['ps_2024'] = actif_in_Q2.apply(
     lambda df: prim_2024(df), axis=1)
-actif_in_Q4['secondary_1014'] = actif_in_Q4.apply(
+actif_in_Q2['secondary_1014'] = actif_in_Q2.apply(
     lambda df: sec_1014(df), axis=1)
-actif_in_Q4['secondary_1519'] = actif_in_Q4.apply(
+actif_in_Q2['secondary_1519'] = actif_in_Q2.apply(
     lambda df: sec_1519(df), axis=1)
-actif_in_Q4['secondary_2024'] = actif_in_Q4.apply(
+actif_in_Q2['secondary_2024'] = actif_in_Q2.apply(
     lambda df: sec_2024(df), axis=1)
-actif_in_Q4['complete_1014'] = actif_in_Q4.apply(
+actif_in_Q2['complete_1014'] = actif_in_Q2.apply(
     lambda df: comp_1014(df), axis=1)
-actif_in_Q4['complete_1519'] = actif_in_Q4.apply(
+actif_in_Q2['complete_1519'] = actif_in_Q2.apply(
     lambda df: comp_1519(df), axis=1)
-actif_in_Q4['complete_2024'] = actif_in_Q4.apply(
+actif_in_Q2['complete_2024'] = actif_in_Q2.apply(
     lambda df: comp_2024(df), axis=1)
 
 
 ########### pure case
 
-actif_in_Q4.date_interview = to_datetime(actif_in_Q4.date_interview)
-actif_in_Q3.date_interview = to_datetime(actif_in_Q3.date_interview)
-actif_in_Q3['complete_at_least']= actif_in_Q3.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q4['complete_at_least'] = actif_in_Q4.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q3['isEnrolledQ4']= actif_in_Q3.date_interview.map(isEnrolledQ4)
-actif_in_Q4['isEnrolledQ4'] = actif_in_Q4.date_interview.map(isEnrolledQ4)
+actif_in_Q2.date_interview = to_datetime(actif_in_Q2.date_interview)
+actif_in_Q1.date_interview = to_datetime(actif_in_Q1.date_interview)
+actif_in_Q1['complete_at_least']= actif_in_Q1.apply(lambda df: complete_at_least(df),axis=1)
+actif_in_Q2['complete_at_least'] = actif_in_Q2.apply(lambda df: complete_at_least(df),axis=1)
+actif_in_Q1['isEnrolledQ2']= actif_in_Q1.date_interview.map(isEnrolledQ2)
+actif_in_Q2['isEnrolledQ2'] = actif_in_Q2.date_interview.map(isEnrolledQ2)
 
 

@@ -93,8 +93,8 @@ def complete_at_least(df):
     return "yes" if (df.curriculum=="yes" or df.condom=="yes" or df.hts=="yes" or df.post_violence_care=="yes" or df.socioeco_app=="yes" or df.prep=="yes" or df.parenting=="yes") else "no"
 
 
-def isEnrolledQ4(date):
-    return "yes" if (type(date)!=type(NaT)) and (date.year == 2021 and date.month>=7 and date.month<=9) else "no"
+def isEnrolledQ2(date):
+    return "yes" if (type(date)!=type(NaT)) and (date.year == 2022 and date.month>=1 and date.month<=3) else "no"
 
 
 
