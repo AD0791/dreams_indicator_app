@@ -44,13 +44,16 @@ SELECT
     b.nbre_pres_for_inter,
     h.nbre_parenting_coupe_present,
     b.has_comdom_topic,
+    b.has_preventive_vbg,
     d.number_of_condoms_sensibilize,
+    d.number_condoms_sensibilization_date_in_the_interval,
     d.number_condoms_reception_in_the_interval,
     d.number_test_date_in_the_interval,
     d.test_results,
     d.number_vbg_treatment_date_in_the_interval,
     d.number_gynecological_care_date_in_the_interval,
     d.number_prep_initiation_date_in_the_interval,
+    d.number_contraceptive_reception_in_the_interval,
     c.age_in_year,
     IF(c.age_in_year >= 10
             AND c.age_in_year <= 14,
@@ -67,16 +70,17 @@ SELECT
                     'not_valid_age')))) AS age_range,
     IF(c.age_in_year >= 10
             AND c.age_in_year <= 14,
-        '10-14',if(c.age_in_year >= 15
-            AND c.age_in_year <= 17,
-        '15-17',
-        IF(c.age_in_year >= 18
-                AND c.age_in_year <= 24,
-            '18-24',
-            IF(c.age_in_year >= 25
-                    AND c.age_in_year <= 29,
-                '25-29',
-                'not_valid_age')))) AS ovc_age,
+        '10-14',
+        IF(c.age_in_year >= 15
+                AND c.age_in_year <= 17,
+            '15-17',
+            IF(c.age_in_year >= 18
+                    AND c.age_in_year <= 24,
+                '18-24',
+                IF(c.age_in_year >= 25
+                        AND c.age_in_year <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS ovc_age,
     c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
@@ -129,7 +133,7 @@ FROM
             OR dpga.parent_vd = 'P'
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
-            AND dpgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')  UNION (SELECT 
+            AND dpgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}') UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
@@ -148,14 +152,18 @@ FROM
             IF((SUM(number_of_session_s_08) > 0
                 OR SUM(number_of_session_s_10) > 0
                 OR SUM(number_of_session_s_11) > 0
-                OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic
+                OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic,
+            IF((SUM(number_of_session_s_14) > 0
+                OR SUM(number_of_session_s_16) > 0), 'yes', 'no') AS has_preventive_vbg
     FROM
         (SELECT 
         id_patient,
             SUM(dgs.topic = 8) AS number_of_session_s_08,
             SUM(dgs.topic = 10) AS number_of_session_s_10,
             SUM(dgs.topic = 11) AS number_of_session_s_11,
-            SUM(dgs.topic = 18) AS number_of_session_s_18
+            SUM(dgs.topic = 18) AS number_of_session_s_18,
+            SUM(dgs.topic = 14) AS number_of_session_s_14,
+            SUM(dgs.topic = 16) AS number_of_session_s_16
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
@@ -176,6 +184,10 @@ FROM
         LEFT JOIN
     (SELECT 
         dhi1.id_patient,
+            SUM((dhi1.condom_sensibilization_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
+                AND (dhi1.condom_sensibilization_date IS NOT NULL)) AS number_condoms_sensibilization_date_in_the_interval,
+            SUM((dhi1.contraceptive_reception_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
+                AND (dhi1.contraceptive_reception_date IS NOT NULL)) AS number_contraceptive_reception_in_the_interval,
             SUM(dhi1.has_been_sensibilize_for_condom = 1
                 AND (dhi1.has_been_sensibilize_for_condom IS NOT NULL)) AS number_of_condoms_sensibilize,
             SUM((dhi1.condoms_reception_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
@@ -188,7 +200,7 @@ FROM
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
             SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}')
                 AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
-                GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
+            GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
     FROM
         dream_hivinfos dhi1
     GROUP BY dhi1.id_patient) d ON a.id_patient = d.id_patient
@@ -217,9 +229,10 @@ FROM
     LEFT JOIN lookup_commune lc ON lc.id = dh.commune
     LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
-        
-        (SELECT 
-        dpga.id_patient, count(*) as nbre_parenting_coupe_present,dpgs.id_group as id_parenting_group
+    (SELECT 
+        dpga.id_patient,
+            COUNT(*) AS nbre_parenting_coupe_present,
+            dpgs.id_group AS id_parenting_group
     FROM
         dream_parenting_group_attendance dpga
     LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
@@ -229,9 +242,8 @@ FROM
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_Qi_start.value}' AND '{Set_date.period_Qi_end.value}'
-            group by id_patient
-            ) h on h.id_patient=a.id_patient
-            LEFT JOIN
+    GROUP BY id_patient) h ON h.id_patient = a.id_patient
+        LEFT JOIN
     ((SELECT 
         dhi.id_patient
     FROM
@@ -241,7 +253,9 @@ FROM
             OR (dhi.condoms_reception_date < '{Set_date.period_Qi_start.value}')
             OR (dhi.vbg_treatment_date < '{Set_date.period_Qi_start.value}')
             OR (dhi.gynecological_care_date < '{Set_date.period_Qi_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.period_Qi_start.value}')) UNION (SELECT 
+            OR (dhi.prep_initiation_date < '{Set_date.period_Qi_start.value}')
+            OR (dhi.condom_sensibilization_date < '{Set_date.period_Qi_start.value}')
+            OR (dhi.contraceptive_reception_date < '{Set_date.period_Qi_start.value}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
@@ -262,13 +276,16 @@ SELECT
     b.nbre_pres_for_inter,
     h.nbre_parenting_coupe_present,
     b.has_comdom_topic,
+    b.has_preventive_vbg,
     d.number_of_condoms_sensibilize,
+    d.number_condoms_sensibilization_date_in_the_interval,
     d.number_condoms_reception_in_the_interval,
     d.number_test_date_in_the_interval,
     d.test_results,
     d.number_vbg_treatment_date_in_the_interval,
     d.number_gynecological_care_date_in_the_interval,
     d.number_prep_initiation_date_in_the_interval,
+    d.number_contraceptive_reception_in_the_interval,
     c.age_in_year,
     IF(c.age_in_year >= 10
             AND c.age_in_year <= 14,
@@ -285,16 +302,17 @@ SELECT
                     'not_valid_age')))) AS age_range,
     IF(c.age_in_year >= 10
             AND c.age_in_year <= 14,
-        '10-14',if(c.age_in_year >= 15
-            AND c.age_in_year <= 17,
-        '15-17',
-        IF(c.age_in_year >= 18
-                AND c.age_in_year <= 24,
-            '18-24',
-            IF(c.age_in_year >= 25
-                    AND c.age_in_year <= 29,
-                '25-29',
-                'not_valid_age')))) AS ovc_age,
+        '10-14',
+        IF(c.age_in_year >= 15
+                AND c.age_in_year <= 17,
+            '15-17',
+            IF(c.age_in_year >= 18
+                    AND c.age_in_year <= 24,
+                '18-24',
+                IF(c.age_in_year >= 25
+                        AND c.age_in_year <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS ovc_age,
     c.date_interview,
     IF(c.month_in_program >= 0
             AND c.month_in_program <= 6,
@@ -347,7 +365,7 @@ FROM
             OR dpga.parent_vd = 'P'
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
-            AND dpgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')  UNION (SELECT 
+            AND dpgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}') UNION (SELECT 
         dm.id_patient
     FROM
         dream_member dm
@@ -366,14 +384,18 @@ FROM
             IF((SUM(number_of_session_s_08) > 0
                 OR SUM(number_of_session_s_10) > 0
                 OR SUM(number_of_session_s_11) > 0
-                OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic
+                OR SUM(number_of_session_s_18) > 0), 'yes', 'no') AS has_comdom_topic,
+            IF((SUM(number_of_session_s_14) > 0
+                OR SUM(number_of_session_s_16) > 0), 'yes', 'no') AS has_preventive_vbg
     FROM
         (SELECT 
         id_patient,
             SUM(dgs.topic = 8) AS number_of_session_s_08,
             SUM(dgs.topic = 10) AS number_of_session_s_10,
             SUM(dgs.topic = 11) AS number_of_session_s_11,
-            SUM(dgs.topic = 18) AS number_of_session_s_18
+            SUM(dgs.topic = 18) AS number_of_session_s_18,
+            SUM(dgs.topic = 14) AS number_of_session_s_14,
+            SUM(dgs.topic = 16) AS number_of_session_s_16
     FROM
         dream_group_attendance dga
     LEFT JOIN dream_group_session dgs ON dgs.id = dga.id_group_session
@@ -394,6 +416,10 @@ FROM
         LEFT JOIN
     (SELECT 
         dhi1.id_patient,
+            SUM((dhi1.condom_sensibilization_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
+                AND (dhi1.condom_sensibilization_date IS NOT NULL)) AS number_condoms_sensibilization_date_in_the_interval,
+            SUM((dhi1.contraceptive_reception_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
+                AND (dhi1.contraceptive_reception_date IS NOT NULL)) AS number_contraceptive_reception_in_the_interval,
             SUM(dhi1.has_been_sensibilize_for_condom = 1
                 AND (dhi1.has_been_sensibilize_for_condom IS NOT NULL)) AS number_of_condoms_sensibilize,
             SUM((dhi1.condoms_reception_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
@@ -406,7 +432,7 @@ FROM
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
             SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}')
                 AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
-                GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
+            GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
     FROM
         dream_hivinfos dhi1
     GROUP BY dhi1.id_patient) d ON a.id_patient = d.id_patient
@@ -435,9 +461,10 @@ FROM
     LEFT JOIN lookup_commune lc ON lc.id = dh.commune
     LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
-        
-        (SELECT 
-        dpga.id_patient, count(*) as nbre_parenting_coupe_present,dpgs.id_group as id_parenting_group
+    (SELECT 
+        dpga.id_patient,
+            COUNT(*) AS nbre_parenting_coupe_present,
+            dpgs.id_group AS id_parenting_group
     FROM
         dream_parenting_group_attendance dpga
     LEFT JOIN dream_parenting_group_session dpgs ON dpgs.id = dpga.id_parenting_group_session
@@ -447,9 +474,8 @@ FROM
             OR dpga.yg_g = 'P'
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_Qj_start.value}' AND '{Set_date.period_Qj_end.value}'
-            group by id_patient
-            ) h on h.id_patient=a.id_patient
-            LEFT JOIN
+    GROUP BY id_patient) h ON h.id_patient = a.id_patient
+        LEFT JOIN
     ((SELECT 
         dhi.id_patient
     FROM
@@ -459,7 +485,9 @@ FROM
             OR (dhi.condoms_reception_date < '{Set_date.period_Qj_start.value}')
             OR (dhi.vbg_treatment_date < '{Set_date.period_Qj_start.value}')
             OR (dhi.gynecological_care_date < '{Set_date.period_Qj_start.value}')
-            OR (dhi.prep_initiation_date < '{Set_date.period_Qj_start.value}')) UNION (SELECT 
+            OR (dhi.prep_initiation_date < '{Set_date.period_Qj_start.value}')
+            OR (dhi.condom_sensibilization_date < '{Set_date.period_Qj_start.value}')
+            OR (dhi.contraceptive_reception_date < '{Set_date.period_Qj_start.value}')) UNION (SELECT 
         dga.id_patient
     FROM
         dream_group_attendance dga
@@ -495,16 +523,18 @@ actif_in_Q2strict = actif_in_Q2[~actif_in_Q2.id_patient.isin(actif_in_Q1.id_pati
 actif_in_Q1strict.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q1strict.has_comdom_topic.fillna('no', inplace=True)
 actif_in_Q1strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q1strict.number_condoms_reception_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q1strict.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1strict.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1strict.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q1strict.number_vbg_treatment_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q1strict.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1strict.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q1strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q1strict.number_contraceptive_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q1strict.number_condoms_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 
 actif_in_Q1strict.nbre_pres_for_inter = actif_in_Q1strict.nbre_pres_for_inter.astype(
@@ -523,6 +553,10 @@ actif_in_Q1strict.number_prep_initiation_date_in_the_interval = actif_in_Q1stric
     int16)
 actif_in_Q1strict.nbre_parenting_coupe_present = actif_in_Q1strict.nbre_parenting_coupe_present.astype(
     int16)
+actif_in_Q1strict.number_contraceptive_reception_in_the_interval = actif_in_Q1strict.number_contraceptive_reception_in_the_interval.astype(
+    int16)
+actif_in_Q1strict.number_condoms_sensibilization_date_in_the_interval = actif_in_Q1strict.number_condoms_sensibilization_date_in_the_interval.astype(
+    int16)
 
 actif_in_Q1strict['parenting_detailed'] = actif_in_Q1strict.nbre_parenting_coupe_present.map(
     parenting_detailed)
@@ -536,6 +570,8 @@ actif_in_Q1strict['condom'] = actif_in_Q1strict.apply(
     lambda df: condom(df), axis=1)
 actif_in_Q1strict['hts'] = actif_in_Q1strict.number_test_date_in_the_interval.map(
     hts)
+actif_in_Q1strict['contraceptive'] = actif_in_Q1strict.number_contraceptive_reception_in_the_interval.map(
+    contraceptive)
 actif_in_Q1strict['post_violence_care'] = actif_in_Q1strict.apply(
     lambda df: postcare(df), axis=1)
 actif_in_Q1strict['socioeco_app'] = actif_in_Q1strict.apply(
@@ -561,23 +597,24 @@ actif_in_Q1strict['complete_1519'] = actif_in_Q1strict.apply(
     lambda df: comp_1519(df), axis=1)
 actif_in_Q1strict['complete_2024'] = actif_in_Q1strict.apply(
     lambda df: comp_2024(df), axis=1)
-
 #############################################
 # Q2 strict
 
 actif_in_Q2strict.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q2strict.has_comdom_topic.fillna('no', inplace=True)
 actif_in_Q2strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q2strict.number_condoms_reception_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q2strict.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2strict.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2strict.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q2strict.number_vbg_treatment_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q2strict.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2strict.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q2strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q2strict.number_contraceptive_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q2strict.number_condoms_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 
 actif_in_Q2strict.nbre_pres_for_inter = actif_in_Q2strict.nbre_pres_for_inter.astype(
@@ -596,8 +633,11 @@ actif_in_Q2strict.number_prep_initiation_date_in_the_interval = actif_in_Q2stric
     int16)
 actif_in_Q2strict.nbre_parenting_coupe_present = actif_in_Q2strict.nbre_parenting_coupe_present.astype(
     int16)
+actif_in_Q2strict.number_contraceptive_reception_in_the_interval = actif_in_Q2strict.number_contraceptive_reception_in_the_interval.astype(
+    int16)
+actif_in_Q2strict.number_condoms_sensibilization_date_in_the_interval = actif_in_Q2strict.number_condoms_sensibilization_date_in_the_interval.astype(
+    int16)
 
-# services
 actif_in_Q2strict['parenting_detailed'] = actif_in_Q2strict.nbre_parenting_coupe_present.map(
     parenting_detailed)
 actif_in_Q2strict['parenting'] = actif_in_Q2strict.nbre_parenting_coupe_present.map(
@@ -610,6 +650,8 @@ actif_in_Q2strict['condom'] = actif_in_Q2strict.apply(
     lambda df: condom(df), axis=1)
 actif_in_Q2strict['hts'] = actif_in_Q2strict.number_test_date_in_the_interval.map(
     hts)
+actif_in_Q2strict['contraceptive'] = actif_in_Q2strict.number_contraceptive_reception_in_the_interval.map(
+    contraceptive)
 actif_in_Q2strict['post_violence_care'] = actif_in_Q2strict.apply(
     lambda df: postcare(df), axis=1)
 actif_in_Q2strict['socioeco_app'] = actif_in_Q2strict.apply(
@@ -651,6 +693,10 @@ actif_in_Q1Q2.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1Q2.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q1Q2.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q1Q2.number_contraceptive_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q1Q2.number_condoms_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 
 actif_in_Q1Q2.nbre_pres_for_inter = actif_in_Q1Q2.nbre_pres_for_inter.astype(
@@ -669,7 +715,10 @@ actif_in_Q1Q2.number_prep_initiation_date_in_the_interval = actif_in_Q1Q2.number
     int16)
 actif_in_Q1Q2.nbre_parenting_coupe_present = actif_in_Q1Q2.nbre_parenting_coupe_present.astype(
     int16)
-
+actif_in_Q1Q2.number_contraceptive_reception_in_the_interval = actif_in_Q1Q2.number_contraceptive_reception_in_the_interval.astype(
+    int16)
+actif_in_Q1Q2.number_condoms_sensibilization_date_in_the_interval = actif_in_Q1Q2.number_condoms_sensibilization_date_in_the_interval.astype(
+    int16)
 
 actif_in_Q1Q2['parenting_detailed'] = actif_in_Q1Q2.nbre_parenting_coupe_present.map(
     parenting_detailed)
@@ -677,9 +726,14 @@ actif_in_Q1Q2['parenting'] = actif_in_Q1Q2.nbre_parenting_coupe_present.map(
     parenting)
 actif_in_Q1Q2['curriculum_detailed'] = actif_in_Q1Q2.nbre_pres_for_inter.map(
     curriculum_detailed)
-actif_in_Q1Q2['curriculum'] = actif_in_Q1Q2.nbre_pres_for_inter.map(curriculum)
-actif_in_Q1Q2['condom'] = actif_in_Q1Q2.apply(lambda df: condom(df), axis=1)
-actif_in_Q1Q2['hts'] = actif_in_Q1Q2.number_test_date_in_the_interval.map(hts)
+actif_in_Q1Q2['curriculum'] = actif_in_Q1Q2.nbre_pres_for_inter.map(
+    curriculum)
+actif_in_Q1Q2['condom'] = actif_in_Q1Q2.apply(
+    lambda df: condom(df), axis=1)
+actif_in_Q1Q2['hts'] = actif_in_Q1Q2.number_test_date_in_the_interval.map(
+    hts)
+actif_in_Q1Q2['contraceptive'] = actif_in_Q1Q2.number_contraceptive_reception_in_the_interval.map(
+    contraceptive)
 actif_in_Q1Q2['post_violence_care'] = actif_in_Q1Q2.apply(
     lambda df: postcare(df), axis=1)
 actif_in_Q1Q2['socioeco_app'] = actif_in_Q1Q2.apply(
@@ -731,16 +785,18 @@ actif_in_Q1Q2['isEnrolledQ2']= actif_in_Q1Q2.date_interview.map(isEnrolledQ2)
 actif_in_Q1.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q1.has_comdom_topic.fillna('no', inplace=True)
 actif_in_Q1.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q1.number_condoms_reception_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q1.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q1.number_vbg_treatment_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q1.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q1.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q1.number_contraceptive_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q1.number_condoms_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 
 actif_in_Q1.nbre_pres_for_inter = actif_in_Q1.nbre_pres_for_inter.astype(
@@ -759,6 +815,10 @@ actif_in_Q1.number_prep_initiation_date_in_the_interval = actif_in_Q1.number_pre
     int16)
 actif_in_Q1.nbre_parenting_coupe_present = actif_in_Q1.nbre_parenting_coupe_present.astype(
     int16)
+actif_in_Q1.number_contraceptive_reception_in_the_interval = actif_in_Q1.number_contraceptive_reception_in_the_interval.astype(
+    int16)
+actif_in_Q1.number_condoms_sensibilization_date_in_the_interval = actif_in_Q1.number_condoms_sensibilization_date_in_the_interval.astype(
+    int16)
 
 actif_in_Q1['parenting_detailed'] = actif_in_Q1.nbre_parenting_coupe_present.map(
     parenting_detailed)
@@ -772,6 +832,8 @@ actif_in_Q1['condom'] = actif_in_Q1.apply(
     lambda df: condom(df), axis=1)
 actif_in_Q1['hts'] = actif_in_Q1.number_test_date_in_the_interval.map(
     hts)
+actif_in_Q1['contraceptive'] = actif_in_Q1.number_contraceptive_reception_in_the_interval.map(
+    contraceptive)
 actif_in_Q1['post_violence_care'] = actif_in_Q1.apply(
     lambda df: postcare(df), axis=1)
 actif_in_Q1['socioeco_app'] = actif_in_Q1.apply(
@@ -804,16 +866,18 @@ actif_in_Q1['complete_2024'] = actif_in_Q1.apply(
 actif_in_Q2.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q2.has_comdom_topic.fillna('no', inplace=True)
 actif_in_Q2.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q2.number_condoms_reception_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q2.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q2.number_vbg_treatment_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_in_Q2.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q2.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif_in_Q2.number_contraceptive_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif_in_Q2.number_condoms_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 
 actif_in_Q2.nbre_pres_for_inter = actif_in_Q2.nbre_pres_for_inter.astype(
@@ -832,8 +896,11 @@ actif_in_Q2.number_prep_initiation_date_in_the_interval = actif_in_Q2.number_pre
     int16)
 actif_in_Q2.nbre_parenting_coupe_present = actif_in_Q2.nbre_parenting_coupe_present.astype(
     int16)
+actif_in_Q2.number_contraceptive_reception_in_the_interval = actif_in_Q2.number_contraceptive_reception_in_the_interval.astype(
+    int16)
+actif_in_Q2.number_condoms_sensibilization_date_in_the_interval = actif_in_Q2.number_condoms_sensibilization_date_in_the_interval.astype(
+    int16)
 
-# services
 actif_in_Q2['parenting_detailed'] = actif_in_Q2.nbre_parenting_coupe_present.map(
     parenting_detailed)
 actif_in_Q2['parenting'] = actif_in_Q2.nbre_parenting_coupe_present.map(
@@ -846,6 +913,8 @@ actif_in_Q2['condom'] = actif_in_Q2.apply(
     lambda df: condom(df), axis=1)
 actif_in_Q2['hts'] = actif_in_Q2.number_test_date_in_the_interval.map(
     hts)
+actif_in_Q2['contraceptive'] = actif_in_Q2.number_contraceptive_reception_in_the_interval.map(
+    contraceptive)
 actif_in_Q2['post_violence_care'] = actif_in_Q2.apply(
     lambda df: postcare(df), axis=1)
 actif_in_Q2['socioeco_app'] = actif_in_Q2.apply(
@@ -871,7 +940,6 @@ actif_in_Q2['complete_1519'] = actif_in_Q2.apply(
     lambda df: comp_1519(df), axis=1)
 actif_in_Q2['complete_2024'] = actif_in_Q2.apply(
     lambda df: comp_2024(df), axis=1)
-
 
 ########### pure case
 

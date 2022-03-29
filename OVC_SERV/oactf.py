@@ -261,16 +261,18 @@ engine.dispose()
 actif.nbre_pres_for_inter.fillna(0, inplace=True)
 actif.has_comdom_topic.fillna('no', inplace=True)
 actif.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif.number_condoms_reception_in_the_interval.fillna(
-    0, inplace=True)
+actif.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif.number_vbg_treatment_date_in_the_interval.fillna(
-    0, inplace=True)
+actif.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
 actif.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif.nbre_parenting_coupe_present.fillna(0, inplace=True)
+actif.number_contraceptive_reception_in_the_interval.fillna(
+    0, inplace=True)
+actif.number_condoms_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 
 actif.nbre_pres_for_inter = actif.nbre_pres_for_inter.astype(
@@ -288,6 +290,10 @@ actif.number_vbg_treatment_date_in_the_interval = actif.number_vbg_treatment_dat
 actif.number_prep_initiation_date_in_the_interval = actif.number_prep_initiation_date_in_the_interval.astype(
     int16)
 actif.nbre_parenting_coupe_present = actif.nbre_parenting_coupe_present.astype(
+    int16)
+actif.number_contraceptive_reception_in_the_interval = actif.number_contraceptive_reception_in_the_interval.astype(
+    int16)
+actif.number_condoms_sensibilization_date_in_the_interval = actif.number_condoms_sensibilization_date_in_the_interval.astype(
     int16)
 
 actif['parenting_detailed'] = actif.nbre_parenting_coupe_present.map(
@@ -330,6 +336,7 @@ actif['complete_1519'] = actif.apply(
 actif['complete_2024'] = actif.apply(
     lambda df: comp_2024(df), axis=1)
 
+actif.date_interview = to_datetime(actif.date_interview)
 
 actif['complete_at_least']= actif.apply(lambda df: complete_at_least(df),axis=1)
 actif['isEnrolledQ2']= actif.date_interview.map(isEnrolledQ2)
