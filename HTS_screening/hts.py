@@ -20,15 +20,15 @@ engine = create_engine(
 
 
 query = """
-SELECT 
+SELECT
     vhs.*,
     vhs.a7_score + vhs.12_score + vhs.12a_score + vhs.12b_score + vhs.14a_score + vhs.15a_score AS total_score
 FROM
-    caris_db.view_hts_score vhs; 
+    caris_db.view_hts_score vhs;
 """
 
 _sdata_query = f"""
-SELECT 
+SELECT
     d.case_id,
     dm.id_patient as id_patient,
     p.patient_code AS code,
@@ -87,5 +87,33 @@ sdata = read_sql_query(_sdata_query, engine, parse_dates=True)
 sdata.id_patient = sdata.id_patient.astype(Int32Dtype())
 
 hts_screening = read_sql_query(query, engine, parse_dates=True)
+hts_screening['id_patient'] = hts_screening.id_patient.astype(Int32Dtype())
+hts_screening['age'] = hts_screening.age.astype(Int32Dtype())
+screening_vih = hts_screening[
+    [
+        'case_id',
+        'id_patient',
+        'patient_code',
+        'total_score',
+        'lastname',
+        'firstname',
+        'interview_date',
+        'dob',
+        'age',
+        'commune',
+        'age_range',
+        'ovc_age'
+    ]
+]
+
+hts = base[
+    base.hts == 'yes'
+]
+
+
+hts_1824 = base[
+    (base.hts == 'yes') &
+    (base.ovc_age == '18-24')
+]
 
 engine.dispose()
