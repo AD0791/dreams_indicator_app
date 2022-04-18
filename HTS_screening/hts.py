@@ -5,7 +5,8 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from pandas import (
     read_sql_query,
-    Int32Dtype
+    Int32Dtype,
+    to_datetime
 )
 
 load_dotenv()
@@ -105,15 +106,16 @@ screening_vih = hts_screening[
         'ovc_age'
     ]
 ]
+screening_vih.interview_date = to_datetime(screening_vih.interview_date)
 
 hts = base[
     base.hts == 'yes'
 ]
 
-
-hts_1824 = base[
-    (base.hts == 'yes') &
-    (base.ovc_age == '18-24')
+fy22 = screening_vih[
+    (screening_vih.interview_date >= "2021-10-01") &
+    (screening_vih.interview_date <= "2022-03-31")
 ]
+
 
 engine.dispose()
