@@ -1,4 +1,6 @@
 from pandas import NaT
+
+
 def curriculum_detailed(pres):
     if pres >= 17:
         return "yes"
@@ -68,8 +70,9 @@ def prim_1519(df):
 def prim_2024(df):
     return "primary" if (df.age_range == "20-24" and df.curriculum == "yes" and df.condom == "yes") else "no"
 
+
 def sec_1014(df):
-    return "secondary" if (df.age_range == "10-14" and ((df.condom == "yes") | (df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes")| (df.contraceptive == "yes"))) else "no"
+    return "secondary" if (df.age_range == "10-14" and ((df.condom == "yes") | (df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes") | (df.contraceptive == "yes"))) else "no"
 
 
 def sec_1519(df):
@@ -77,40 +80,34 @@ def sec_1519(df):
 
 
 def sec_2024(df):
-    return "secondary" if (df.age_range == "20-24" and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes")| (df.contraceptive == "yes"))) else "no"
+    return "secondary" if (df.age_range == "20-24" and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes") | (df.contraceptive == "yes"))) else "no"
 
 
 def comp_1014(df):
-    return "complete" if (df.age_range == "10-14" and df.curriculum == "no" and ((df.condom == "yes") | (df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes")| (df.contraceptive == "yes"))) else "no"
+    return "complete" if (df.age_range == "10-14" and df.curriculum == "no" and ((df.condom == "yes") | (df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes") | (df.contraceptive == "yes"))) else "no"
 
 
 def comp_1519(df):
-    return "complete" if (df.age_range == "15-19" and (((df.curriculum == "yes") & (df.condom == "no")) | ((df.curriculum == "no") & (df.condom == "yes"))) and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes")| (df.contraceptive == "yes"))) else "no"
+    return "complete" if (df.age_range == "15-19" and (((df.curriculum == "yes") & (df.condom == "no")) | ((df.curriculum == "no") & (df.condom == "yes"))) and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes") | (df.contraceptive == "yes"))) else "no"
 
 
 def comp_2024(df):
-    return "complete" if (df.age_range == "20-24" and (((df.curriculum == "yes") & (df.condom == "no")) | ((df.curriculum == "no") & (df.condom == "yes"))) and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes")| (df.contraceptive == "yes"))) else "no"
-
-
+    return "complete" if (df.age_range == "20-24" and (((df.curriculum == "yes") & (df.condom == "no")) | ((df.curriculum == "no") & (df.condom == "yes"))) and ((df.hts == "yes") | (df.post_violence_care == "yes") | (df.socioeco_app == "yes") | (df.prep == "yes") | (df.contraceptive == "yes"))) else "no"
 
 
 def complete_at_least(df):
-    return "yes" if (df.curriculum=="yes" or df.condom=="yes" or df.hts=="yes" or df.post_violence_care=="yes" or df.socioeco_app=="yes" or df.prep=="yes" or df.parenting=="yes" or df.contraceptive=='yes') else "no"
+    return "yes" if (df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.prep == "yes" or df.parenting == "yes" or df.contraceptive == 'yes') else "no"
 
 
 def isEnrolledQ2(date):
-    return "yes" if (type(date)!=type(NaT)) and (date.year == 2022 and date.month>=1 and date.month<=3) else "no"
+    return "yes" if (type(date) != type(NaT)) and (date.year == 2022 and date.month >= 1 and date.month <= 3) else "no"
 
 
-
-##### not implemented yet
+# not implemented yet
 
 
 def isHtsTested(df):
     if (df.number_test_date_in_the_interval == 0 and df.test_results == "0,"):
         return "no"
-    if (df.number_test_date_in_the_interval>0 or df.test_results!= "0,"):
+    if (df.number_test_date_in_the_interval > 0 or df.test_results != "0,"):
         return "yes"
-    
-    
-    

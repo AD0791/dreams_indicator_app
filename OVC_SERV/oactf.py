@@ -15,12 +15,15 @@ PASSWORD = config('PASSCaris')
 HOSTNAME = config('HOSTCaris')
 DBNAME = config('DBCaris')
 
+
 class Set_date(Enum):
     period_start = "2021-10-01"
     period_end = "2022-03-31"
 
+
 # get the engine to connect and fetch
-engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+engine = create_engine(
+    f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
 
 query_period = f"""
 SELECT 
@@ -338,6 +341,6 @@ actif['complete_2024'] = actif.apply(
 
 actif.date_interview = to_datetime(actif.date_interview)
 
-actif['complete_at_least']= actif.apply(lambda df: complete_at_least(df),axis=1)
-actif['isEnrolledQ2']= actif.date_interview.map(isEnrolledQ2)
-
+actif['complete_at_least'] = actif.apply(
+    lambda df: complete_at_least(df), axis=1)
+actif['isEnrolledQ2'] = actif.date_interview.map(isEnrolledQ2)
