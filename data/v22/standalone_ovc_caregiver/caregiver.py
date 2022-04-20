@@ -1,47 +1,48 @@
+from cgfunc import ovc_age, gender, age_to_correct
+from decouple import config
+from dotenv import load_dotenv
+from sqlalchemy import create_engine
+import pymysql
+from static.agyw import AgywPrev
 from pandas import read_excel, Int32Dtype, read_sql_query
 from sys import path
-path.insert(0, '../src/static')
-from agyw import AgywPrev
-import pymysql
-from sqlalchemy import create_engine
-from decouple import config 
-from dotenv import load_dotenv
+path.insert(0, './static')
 
-
-
-from cgfunc import ovc_age,gender, age_to_correct
 
 # Gender, place code at first, age_paran, commune
-parent_fap = read_excel('./commcare/FòmAnrejistremanPatisipan_2022_03_30.xlsx')
+parent_fap = read_excel('./commcare/FòmAnrejistremanPatisipan_2022_04_20.xlsx')
 parent_fap.age_paran = parent_fap.age_paran.astype(Int32Dtype())
 parent_fap.age_paran.fillna(-1, inplace=True)
 parent_fap['age_ovc'] = parent_fap.age_paran.map(ovc_age)
 parent_fap['age_status'] = parent_fap.age_paran.map(age_to_correct)
 parent_fap.Gender = parent_fap.Gender.map(gender)
 
-parents = parent_fap[['code','non_paran_responsab','Gender','commune','age_paran','age_ovc','age_status']]
+parents = parent_fap[['code', 'non_paran_responsab',
+                      'Gender', 'commune', 'age_paran', 'age_ovc', 'age_status']]
 
 
-###  parenting served in the Quarter
+# parenting served in the Quarter
 datim = AgywPrev()
 base = datim.data_dreams_valid
-parenting_leastone= base[
-    (base.parenting_detailed!="no")
+parenting_leastone = base[
+    (base.parenting_detailed != "no")
 ]
 
-id_parent_served = parenting_leastone[['id_patient','nbre_parenting_coupe_present']]
+id_parent_served = parenting_leastone[[
+    'id_patient', 'nbre_parenting_coupe_present']]
 
 
 # All dreams people
 load_dotenv()
 # get the environment variables needed
-USER= config('USRCaris')
-PASSWORD= config('PASSCaris')
-HOSTNAME= config('HOSTCaris')
-DBNAME= config('DBCaris')
+USER = config('USRCaris')
+PASSWORD = config('PASSCaris')
+HOSTNAME = config('HOSTCaris')
+DBNAME = config('DBCaris')
 
 # get the engine to connect and fetch
-engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+engine = create_engine(
+    f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
 query = '''
 SELECT 
     dm.id_patient as id_patient,
@@ -94,11 +95,10 @@ FROM
     lookup_departement ld ON ld.id = lc.departement
 '''
 
-sdata = read_sql_query(query,engine,parse_dates=True)
+sdata = read_sql_query(query, engine, parse_dates=True)
 # get the test excel file from Query
 
 # close the pool of connection
 engine.dispose()
 
-############ Tidy zone
-
+# Tidy zone
