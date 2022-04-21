@@ -1,3 +1,38 @@
+def type_test(tt):
+    if tt == '0,':
+        return "sanguin"
+    elif ((tt == '1,') | (tt == '0,,1,')):
+        return 'autotest'
+    elif(tt == 'no'):
+        return 'no_info'
+    else:
+        return 'verify_me'
+
+
+def vih_test_result(vtr):
+    if vtr == '0,':
+        return 'no_info'
+    elif(
+        (vtr == '0,,3,') |
+        (vtr == '0,,2,,3,') |
+        (vtr == '2,,3,') |
+        (vtr == '3,')
+    ):
+        return 'indetermine'
+    elif(
+        (vtr == '0,,2,') |
+        (vtr == '2,')
+    ):
+        return 'negatif'
+    elif(
+        (vtr == '0,,1,') |
+        (vtr == '1,')
+    ):
+        return 'positif'
+    else:
+        return 'verify_me'
+
+
 def curriculum_detailed(pres):
     if pres >= 17:
         return "yes"
@@ -38,6 +73,14 @@ def vbg(vbg):
 
 def gyneco(gyneco):
     return "yes" if gyneco > 0 else "no"
+
+
+def prep_awareness(pa):
+    return "yes" if pa > 0 else "no"
+
+
+def prep_reference(pr):
+    return "yes" if pr > 0 else "no"
 
 
 def prep(pd):
