@@ -1,3 +1,4 @@
+
 def type_test(tt):
     if tt == '0,':
         return "sanguin"
@@ -7,6 +8,27 @@ def type_test(tt):
         return 'no_info'
     else:
         return 'verify_me'
+
+
+def vih_autotest_result(var):
+    if var == 'no':
+        return 'no_info'
+    elif(
+        var == '0,'
+    ):
+        return 'indeterminee'
+    elif(
+        (var == '0,,1,') |
+        (var == '1,')
+    ):
+        return 'non_reactif'
+    elif(
+        (var == '2,') |
+        (var == '0,,2,')
+    ):
+        return 'reactif'
+    else:
+        'verify_me'
 
 
 def vih_test_result(vtr):
@@ -63,6 +85,14 @@ def condom(df):
     return "yes" if (df.has_comdom_topic == "yes" or df.number_of_condoms_sensibilize > 0 or df.number_condoms_reception_in_the_interval > 0 or df.number_condoms_sensibilization_date_in_the_interval > 0) else "no"
 
 
+def hts_awareness(ha):
+    return 'yes' if ha > 0 else 'no'
+
+
+def treatment_debut(tdebut):
+    return 'yes' if tdebut > 0 else 'no'
+
+
 def hts(hd):
     return "yes" if hd > 0 else "no"
 
@@ -85,6 +115,10 @@ def prep_reference(pr):
 
 def prep(pd):
     return "yes" if pd > 0 else "no"
+
+
+def contraceptive_awareness(caw):
+    return 'yes' if caw > 0 else 'no'
 
 
 def contraceptive(cd):

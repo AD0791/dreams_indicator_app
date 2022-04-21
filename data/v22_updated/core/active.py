@@ -569,6 +569,12 @@ actif_served.number_condoms_sensibilization_date_in_the_interval.fillna(
     0, inplace=True)
 actif_served.number_prep_awareness_date_in_the_interval.fillna(0, inplace=True)
 actif_served.number_prep_reference_date_in_the_interval.fillna(0, inplace=True)
+actif_served.number_hiv_test_awareness_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_served.number_hiv_treatment_start_date_in_the_interval.fillna(
+    0, inplace=True)
+actif_served.number_contraceptive_sensibilization_date_in_the_interval.fillna(
+    0, inplace=True)
 
 actif_served.nbre_pres_for_inter = actif_served.nbre_pres_for_inter.astype(
     int16)
@@ -594,40 +600,57 @@ actif_served.number_prep_awareness_date_in_the_interval = actif_served.number_pr
     int16)
 actif_served.number_prep_reference_date_in_the_interval = actif_served.number_prep_reference_date_in_the_interval.astype(
     int16)
+actif_served.number_hiv_test_awareness_date_in_the_interval = actif_served.number_hiv_test_awareness_date_in_the_interval.astype(
+    int16)
+actif_served.number_hiv_treatment_start_date_in_the_interval = actif_served.number_hiv_treatment_start_date_in_the_interval.astype(
+    int16)
+actif_served.number_contraceptive_sensibilization_date_in_the_interval = actif_served.number_contraceptive_sensibilization_date_in_the_interval.astype(
+    int16)
 
 # services
-
-
 actif_served['parenting_detailed'] = actif_served.nbre_parenting_coupe_present.map(
     parenting_detailed)
 actif_served['parenting'] = actif_served.nbre_parenting_coupe_present.map(
     parenting)
+
 actif_served['curriculum_detailed'] = actif_served.nbre_pres_for_inter.map(
     curriculum_detailed)
 actif_served['curriculum'] = actif_served.nbre_pres_for_inter.map(curriculum)
+
 actif_served['condom'] = actif_served.apply(lambda df: condom(df), axis=1)
 
-actif_served['type_test'] = actif_served.type_of_test_vih.map(type_test)
+actif_served['hts_awareness'] = actif_served.number_hiv_test_awareness_date_in_the_interval.map(
+    hts_awareness)
+actif_served['hts_type_test'] = actif_served.type_of_test_vih.map(type_test)
 actif_served['hts'] = actif_served.number_test_date_in_the_interval.map(hts)
-actif_served['vih_autotest_result'] =
-actif_served['vih_test_result'] = actif_served.test_results.map(
+actif_served['hts_autotest_result'] = actif_served.autotest_result.map(
+    vih_autotest_result)
+actif_served['hts_test_result'] = actif_served.test_results.map(
     vih_test_result)
+actif_served['hts_treatment_debut'] = actif_served.number_hiv_treatment_start_date_in_the_interval.map(
+    treatment_debut)
 
 
 actif_served['vbg'] = actif_served.number_vbg_treatment_date_in_the_interval.map(
     vbg)
 actif_served['gyneco'] = actif_served.number_gynecological_care_date_in_the_interval.map(
     gyneco)
+
 actif_served['post_violence_care'] = actif_served.apply(
     lambda df: postcare(df), axis=1)
+
 actif_served['socioeco_app'] = actif_served.apply(
     lambda df: socioeco(df), axis=1)
+
 actif_served['prep_awareness'] = actif_served.number_prep_awareness_date_in_the_interval.map(
     prep_awareness)
 actif_served['prep_reference'] = actif_served.number_prep_reference_date_in_the_interval.map(
     prep_reference)
 actif_served['prep'] = actif_served.number_prep_initiation_date_in_the_interval.map(
     prep)
+
+actif_served['contraceptive_awareness'] = actif_served.number_contraceptive_sensibilization_date_in_the_interval.map(
+    contraceptive_awareness)
 actif_served['contraceptive'] = actif_served.number_contraceptive_reception_in_the_interval.map(
     contraceptive)
 
