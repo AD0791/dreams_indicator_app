@@ -10,6 +10,13 @@ from pandas import DataFrame
 DF = TypeVar('pandas.core.frame.DataFrame')
 
 
+comp_def_table = DataFrame({
+    'Composante I': [AgywPrev.datim_titleI()],
+    'Composante II': [AgywPrev.datim_titleII()],
+    'Composante III': [AgywPrev.datim_titleIII()],
+    'Composante IV': [AgywPrev.datim_titleIV()]
+})
+
 base = AgywPrev().data_dreams_valid
 base_table = base.pivot_table(index='age_range', values='id_patient', columns='departement', aggfunc='count', fill_value=0, margins=True,
                               margins_name="Total"
