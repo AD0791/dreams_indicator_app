@@ -3,10 +3,10 @@ from decouple import config
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 import pymysql
-from static.agyw import AgywPrev
+from core.agyw import AgywPrev
 from pandas import read_excel, Int32Dtype, read_sql_query
-from sys import path
-path.insert(0, './static')
+#from sys import path
+#path.insert(0, '../core')
 
 
 # Gender, place code at first, age_paran, commune
@@ -24,12 +24,23 @@ parents = parent_fap[['code', 'non_paran_responsab',
 # parenting served in the Quarter
 datim = AgywPrev()
 base = datim.data_dreams_valid
+
 parenting_leastone = base[
     (base.parenting_detailed != "no")
 ]
 
+parenting_completed = base[
+    (base.parenting_detailed == "yes")
+]
+
+
 id_parent_served = parenting_leastone[[
     'id_patient', 'nbre_parenting_coupe_present']]
+
+id_parent_completed = parenting_completed[[
+    'id_patient',
+    'nbre_parenting_coupe_present'
+]]
 
 
 # All dreams people
