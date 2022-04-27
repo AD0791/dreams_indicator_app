@@ -23,16 +23,13 @@ class Set_date(Enum):
     period_Qj_end = "2022-03-31"
 
 
-
 # get the engine to connect and fetch
-engine = create_engine(f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
+engine = create_engine(
+    f"mysql+pymysql://{USER}:{PASSWORD}@{HOSTNAME}/{DBNAME}")
 
 # logic
 # i<j
 ##########
-
-
-
 
 
 query_Qi_period = f"""
@@ -509,9 +506,12 @@ engine.dispose()
 actif_in_Q1 = agyw_served_Qi
 actif_in_Q2 = agyw_served_Qj
 
-actif_in_Q1Q2 = actif_in_Q1[actif_in_Q1.id_patient.isin(actif_in_Q2.id_patient)]
-actif_in_Q1strict = actif_in_Q1[~actif_in_Q1.id_patient.isin(actif_in_Q2.id_patient)]
-actif_in_Q2strict = actif_in_Q2[~actif_in_Q2.id_patient.isin(actif_in_Q1.id_patient)]
+actif_in_Q1Q2 = actif_in_Q1[actif_in_Q1.id_patient.isin(
+    actif_in_Q2.id_patient)]
+actif_in_Q1strict = actif_in_Q1[~actif_in_Q1.id_patient.isin(
+    actif_in_Q2.id_patient)]
+actif_in_Q2strict = actif_in_Q2[~actif_in_Q2.id_patient.isin(
+    actif_in_Q1.id_patient)]
 
 
 #################################################################
@@ -523,11 +523,13 @@ actif_in_Q2strict = actif_in_Q2[~actif_in_Q2.id_patient.isin(actif_in_Q1.id_pati
 actif_in_Q1strict.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q1strict.has_comdom_topic.fillna('no', inplace=True)
 actif_in_Q1strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q1strict.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1strict.number_condoms_reception_in_the_interval.fillna(
+    0, inplace=True)
 actif_in_Q1strict.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q1strict.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q1strict.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q1strict.number_vbg_treatment_date_in_the_interval.fillna(
+    0, inplace=True)
 actif_in_Q1strict.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q1strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
@@ -603,11 +605,13 @@ actif_in_Q1strict['complete_2024'] = actif_in_Q1strict.apply(
 actif_in_Q2strict.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q2strict.has_comdom_topic.fillna('no', inplace=True)
 actif_in_Q2strict.number_of_condoms_sensibilize.fillna(0, inplace=True)
-actif_in_Q2strict.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
+actif_in_Q2strict.number_condoms_reception_in_the_interval.fillna(
+    0, inplace=True)
 actif_in_Q2strict.number_test_date_in_the_interval.fillna(0, inplace=True)
 actif_in_Q2strict.number_gynecological_care_date_in_the_interval.fillna(
     0, inplace=True)
-actif_in_Q2strict.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
+actif_in_Q2strict.number_vbg_treatment_date_in_the_interval.fillna(
+    0, inplace=True)
 actif_in_Q2strict.number_prep_initiation_date_in_the_interval.fillna(
     0, inplace=True)
 actif_in_Q2strict.nbre_parenting_coupe_present.fillna(0, inplace=True)
@@ -761,26 +765,32 @@ actif_in_Q1Q2['complete_2024'] = actif_in_Q1Q2.apply(
     lambda df: comp_2024(df), axis=1)
 
 
-##### complete and enrolled {merge}
+# complete and enrolled {merge}
 
-actif_in_Q2strict.date_interview = to_datetime(actif_in_Q2strict.date_interview)
-actif_in_Q1strict.date_interview = to_datetime(actif_in_Q1strict.date_interview)
-actif_in_Q1Q2.date_interview= to_datetime(actif_in_Q1Q2.date_interview)
+actif_in_Q2strict.date_interview = to_datetime(
+    actif_in_Q2strict.date_interview)
+actif_in_Q1strict.date_interview = to_datetime(
+    actif_in_Q1strict.date_interview)
+actif_in_Q1Q2.date_interview = to_datetime(actif_in_Q1Q2.date_interview)
 
-actif_in_Q1strict['complete_at_least']= actif_in_Q1strict.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q2strict['complete_at_least'] = actif_in_Q2strict.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q1Q2['complete_at_least']= actif_in_Q1Q2.apply(lambda df: complete_at_least(df),axis=1)
-
-
-actif_in_Q1strict['isEnrolledQ2']= actif_in_Q1strict.date_interview.map(isEnrolledQ2)
-actif_in_Q2strict['isEnrolledQ2'] = actif_in_Q2strict.date_interview.map(isEnrolledQ2)
-actif_in_Q1Q2['isEnrolledQ2']= actif_in_Q1Q2.date_interview.map(isEnrolledQ2)
-
-################################ for Q1 and Q2
+actif_in_Q1strict['complete_at_least'] = actif_in_Q1strict.apply(
+    lambda df: complete_at_least(df), axis=1)
+actif_in_Q2strict['complete_at_least'] = actif_in_Q2strict.apply(
+    lambda df: complete_at_least(df), axis=1)
+actif_in_Q1Q2['complete_at_least'] = actif_in_Q1Q2.apply(
+    lambda df: complete_at_least(df), axis=1)
 
 
+actif_in_Q1strict['isEnrolledQ2'] = actif_in_Q1strict.date_interview.map(
+    isEnrolledQ2)
+actif_in_Q2strict['isEnrolledQ2'] = actif_in_Q2strict.date_interview.map(
+    isEnrolledQ2)
+actif_in_Q1Q2['isEnrolledQ2'] = actif_in_Q1Q2.date_interview.map(isEnrolledQ2)
 
-# Q1 
+# for Q1 and Q2
+
+
+# Q1
 
 actif_in_Q1.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q1.has_comdom_topic.fillna('no', inplace=True)
@@ -861,7 +871,7 @@ actif_in_Q1['complete_2024'] = actif_in_Q1.apply(
     lambda df: comp_2024(df), axis=1)
 
 #############################################
-# Q2 
+# Q2
 
 actif_in_Q2.nbre_pres_for_inter.fillna(0, inplace=True)
 actif_in_Q2.has_comdom_topic.fillna('no', inplace=True)
@@ -941,13 +951,13 @@ actif_in_Q2['complete_1519'] = actif_in_Q2.apply(
 actif_in_Q2['complete_2024'] = actif_in_Q2.apply(
     lambda df: comp_2024(df), axis=1)
 
-########### pure case
+# pure case
 
 actif_in_Q2.date_interview = to_datetime(actif_in_Q2.date_interview)
 actif_in_Q1.date_interview = to_datetime(actif_in_Q1.date_interview)
-actif_in_Q1['complete_at_least']= actif_in_Q1.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q2['complete_at_least'] = actif_in_Q2.apply(lambda df: complete_at_least(df),axis=1)
-actif_in_Q1['isEnrolledQ2']= actif_in_Q1.date_interview.map(isEnrolledQ2)
+actif_in_Q1['complete_at_least'] = actif_in_Q1.apply(
+    lambda df: complete_at_least(df), axis=1)
+actif_in_Q2['complete_at_least'] = actif_in_Q2.apply(
+    lambda df: complete_at_least(df), axis=1)
+actif_in_Q1['isEnrolledQ2'] = actif_in_Q1.date_interview.map(isEnrolledQ2)
 actif_in_Q2['isEnrolledQ2'] = actif_in_Q2.date_interview.map(isEnrolledQ2)
-
-
