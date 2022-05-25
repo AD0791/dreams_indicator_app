@@ -3,7 +3,7 @@ from decouple import config
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 import pymysql
-from core.agyw import AgywPrev
+from static.agyw import AgywPrev
 from pandas import read_excel, Int32Dtype, read_sql_query
 #from sys import path
 #path.insert(0, '../core')
