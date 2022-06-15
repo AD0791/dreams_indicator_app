@@ -22,7 +22,7 @@ class Set_date(Enum):
     master_start = "2017-10-01"
     master_end = "2022-03-31"
     period_start = "2021-10-01"
-    period_end = "2022-05-09"
+    period_end = "2022-03-31"
 
 
 # get the engine to connect and fetch
