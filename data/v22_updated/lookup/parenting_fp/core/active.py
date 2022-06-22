@@ -7,7 +7,7 @@ import pandas as pd
 from numpy import int16
 from enum import Enum
 
-from functions import *
+from .functions import *
 
 load_dotenv()
 
@@ -21,7 +21,7 @@ DBNAME = config('DBCaris')
 class Set_date(Enum):
     master_start = "2017-10-01"
     master_end = "2022-06-21"
-    period_start = "2021-10-01"
+    period_start = "2022-04-01"
     period_end = "2022-06-21"
 
 

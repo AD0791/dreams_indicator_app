@@ -8,8 +8,8 @@ from pandas import Int32Dtype, read_sql_query
 
 datim = AgywPrev()
 base = datim.data_dreams_valid
-ps_1524 = base[
-    (base.parenting_detailed == "has_started")
+cs_1524 = base[
+    (base.curriculum_detailed == "has_started") &
     (base.age_range != "10-14")
 ]
 
