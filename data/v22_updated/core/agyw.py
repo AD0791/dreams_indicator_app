@@ -164,7 +164,7 @@ class AgywPrev:
 
     __PERIOD_DATIM = sorted(list(AGYW_ACTIF.month_in_program_range.unique()))
     __PERIOD_DATIM.append("Total")
-    __AGE_DATIM = sorted(list(AGYW_ACTIF.age_range.unique())[0:3])
+    __AGE_DATIM = sorted(list(AGYW_ACTIF.age_range.unique()))[0:3]
 
     def datim_agyw_prevI(self):
 

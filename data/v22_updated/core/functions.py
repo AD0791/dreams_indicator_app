@@ -130,7 +130,7 @@ def postcare(df):
 
 
 def socioeco(df):
-    return "yes" if (df.muso == "yes" or df.gardening == "yes") else "no"
+    return "yes" if ((df.muso == "yes") or (df.gardening == "yes")) else "no"
 
 
 def prim_1014(df):
