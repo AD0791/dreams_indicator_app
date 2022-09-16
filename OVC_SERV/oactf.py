@@ -2,9 +2,10 @@ import pymysql
 from sqlalchemy import create_engine
 from decouple import config
 from dotenv import load_dotenv
-from pandas import to_datetime, read_sql_query
+from pandas import to_datetime, read_sql_query, read_excel
 from numpy import int16
 from enum import Enum
+from datetime import datetime
 
 from ofunc import *
 
@@ -256,10 +257,22 @@ FROM
 
 """
 
+patient_query= f""" 
+SELECT
+    id as id_patient,
+    patient_code as dreams_code,
+    which_program
+FROM
+    caris_db.patient;
+"""
 
+patient = read_sql_query(patient_query, engine, parse_dates=True)
 actif = read_sql_query(query_period, engine, parse_dates=True)
 engine.dispose()
 
+schooling_dreams = read_excel(f"schooling_dreams {str(datetime.today().strftime('%Y-%m-%d'))}.xlsx")
+schooling_dreams = schooling_dreams[schooling_dreams.closed == False]
+payed_schooling_dreams = schooling_dreams[schooling_dreams.eskew_peye == "1"]
 
 actif.nbre_pres_for_inter.fillna(0, inplace=True)
 actif.has_comdom_topic.fillna('no', inplace=True)
