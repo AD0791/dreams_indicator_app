@@ -2,10 +2,15 @@ import pymysql
 from sqlalchemy import create_engine
 from decouple import config
 from dotenv import load_dotenv
-from pandas import to_datetime, read_sql_query, read_excel
+from pandas import to_datetime, read_sql_query
 from numpy import int16
 from enum import Enum
 from datetime import datetime
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+import os
+
 
 from ofunc import *
 
@@ -270,9 +275,6 @@ patient = read_sql_query(patient_query, engine, parse_dates=True)
 actif = read_sql_query(query_period, engine, parse_dates=True)
 engine.dispose()
 
-schooling_dreams = read_excel(f"schooling_dreams {str(datetime.today().strftime('%Y-%m-%d'))}.xlsx")
-schooling_dreams = schooling_dreams[schooling_dreams.closed == False]
-payed_schooling_dreams = schooling_dreams[schooling_dreams.eskew_peye == "1"]
 
 actif.nbre_pres_for_inter.fillna(0, inplace=True)
 actif.has_comdom_topic.fillna('no', inplace=True)
@@ -357,3 +359,37 @@ actif.date_interview = to_datetime(actif.date_interview)
 actif['complete_at_least'] = actif.apply(
     lambda df: complete_at_least(df), axis=1)
 actif['isEnrolledQ4'] = actif.date_interview.map(isEnrolledQ4)
+
+# schooling
+#Connecting to Commcare
+load_dotenv('id_cc.env')
+email = os.getenv('COMCARE_EMAIL')
+password_cc = os.getenv('COMCARE_PASSWORD')
+
+#Defining the driver
+driver = webdriver.Chrome(ChromeDriverManager().install())
+driver.implicitly_wait(1000)
+
+#Creating login function
+def dreams_schooling():
+    driver.get(
+        'https://www.commcarehq.org/a/caris-test/data/export/custom/new/case/download/ae3ce02aad63402d0108435a413d38cb/'
+    )
+    #driver.find_element_by_xpath('//*[@id="id_auth-username"]').send_keys(email)
+    driver.find_element(By.XPATH,'//*[@id="id_auth-username"]').send_keys(email)
+    #driver.find_element_by_xpath('//*[@id="id_auth-password"]').send_keys(password_cc)
+    driver.find_element(By.XPATH,'//*[@id="id_auth-password"]').send_keys(password_cc)
+    driver.find_element(By.CSS_SELECTOR,'button[type=submit]').click()
+
+#Muso beneficiaries
+dreams_schooling()
+
+#Download the database "All gardens"
+#driver.find_element_by_xpath('//*[@id="download-export-form"]/form/div[2]/div/div[2]/div[1]/button/span[1]').click()
+driver.find_element(By.XPATH,"//*[@id='download-export-form']/form/div[2]/div/div[2]/div[1]/button/span[1]").click()
+#driver.find_element_by_xpath('//*[@id="download-progress"]/div/div/div[2]/div[1]/form/a/span[1]').click()    
+driver.find_element(By.XPATH,"//*[@id='download-progress']/div/div/div[2]/div[1]/form/a/span[1]").click()
+
+
+
+
