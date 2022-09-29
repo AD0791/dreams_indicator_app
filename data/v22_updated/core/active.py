@@ -20,20 +20,20 @@ DBNAME = config('DBCaris')
 
 
 class Set_date(Enum):
-    #master_start = "2017-10-01"
-    #master_end = datetime.today().strftime('%Y-%m-%d')
+    master_start = "2017-10-01"
+    master_end = datetime.today().strftime('%Y-%m-%d')
     #master_start = "2017-10-01"
     #master_end = "2021-11-31"
     
-    #period_start = "2021-10-01"
-    #period_end = datetime.today().strftime('%Y-%m-%d')
+    period_start = "2021-10-01"
+    period_end = datetime.today().strftime('%Y-%m-%d')
     #period_start = "2021-10-01"
     #period_end = "2021-11-31"
     
-    master_start = "2017-10-01"
-    master_end = "2020-11-31"
-    period_start = "2020-10-01"
-    period_end = "2020-11-31"
+    #master_start = "2017-10-01"
+    #master_end = "2020-11-31"
+    #period_start = "2020-10-01"
+    #period_end = "2020-11-31"
 
 
 # get the engine to connect and fetch
