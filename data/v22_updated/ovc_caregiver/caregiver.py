@@ -5,13 +5,38 @@ from sqlalchemy import create_engine
 import pymysql
 from core.agyw import AgywPrev
 from pandas import read_excel, Int32Dtype, read_sql_query
+from datetime import datetime
+date_du_jour = datetime.today().strftime("%Y-%m-%d")
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.common.by import By
+import os
 #from sys import path
 #path.insert(0, '../core')
 
 
+
 # Gender, place code at first, age_paran, commune
+# FòmAnrejistremanPatisipan 2022-10-11
 parent_fap = read_excel(
-    './commcare/FòmAnrejistremanPatisipan_2022_09_16.xlsx')
+    f"~/Downloads/FòmAnrejistremanPatisipan {date_du_jour}.xlsx")
+
+
+parent_fap.rename(
+    columns={
+        "form.anrejistreman_patisipan.dreams_code":"code",
+        "form.anrejistreman_patisipan.non_paran_responsab":"non_paran_responsab",
+        "form.anrejistreman_patisipan.seks":"Gender",
+        "form.anrejistreman_patisipan.laj_paran_responsab":"age_paran",
+        "form.anrejistreman_patisipan.komin_patisipan":"commune"
+    },
+    inplace=True
+)
+
+
+parent_fap = parent_fap.drop_duplicates('code').reset_index(drop = True)
+
+
 parent_fap.age_paran = parent_fap.age_paran.astype(Int32Dtype())
 parent_fap.age_paran.fillna(-1, inplace=True)
 parent_fap['age_ovc'] = parent_fap.age_paran.map(ovc_age)
