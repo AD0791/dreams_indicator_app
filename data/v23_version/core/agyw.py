@@ -87,31 +87,31 @@ class AgywPrev:
         return self.__total_dreams_valid
 
     def __primFunc(self, df):
-        if (df.ps_1014 == "primary" and df.hts == "no" and df.prep == "no" and df.condom == "no" and df.post_violence_care == "no" and df.socioeco_app == "no" and df.parenting == "no" and df.contraceptive == "no"):
+        if (df.ps_1014 == "primary" and df.hts == "no" and df.prep == "no" and df.condom == "no" and df.post_violence_care == "no" and df.socioeco_app == "no" and df.parenting == "no" and df.contraceptive == "no" and df.education=="no"):
             return "full_primary_only"
-        elif (df.ps_1519 == "primary" and df.hts == "no" and df.prep == "no" and df.post_violence_care == "no" and df.socioeco_app == "no" and df.parenting == "no" and df.contraceptive == "no"):
+        elif (df.ps_1519 == "primary" and df.hts == "no" and df.prep == "no" and df.post_violence_care == "no" and df.socioeco_app == "no" and df.parenting == "no" and df.contraceptive == "no" and df.education=="no"):
             return "full_primary_only"
-        elif (df.ps_2024 == "primary" and df.hts == "no" and df.prep == "no" and df.post_violence_care == "no" and df.socioeco_app == "no" and df.parenting == "no" and df.contraceptive == "no"):
+        elif (df.ps_2024 == "primary" and df.hts == "no" and df.prep == "no" and df.post_violence_care == "no" and df.socioeco_app == "no" and df.parenting == "no" and df.contraceptive == "no" and df.education=="no"):
             return "full_primary_only"
         else:
             return "invalid"
 
     def __primLeastOneSecFunc(self, df):
-        if (df.ps_1014 == "primary") and (df.hts == "yes" or df.prep == "yes" or df.condom == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes"):
+        if (df.ps_1014 == "primary") and (df.hts == "yes" or df.prep == "yes" or df.condom == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes" or df.education=="yes"):
             return "full_primary_leastOneSecondary"
-        elif (df.ps_1519 == "primary") and (df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes"):
+        elif (df.ps_1519 == "primary") and (df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes" or df.education=="yes"):
             return "full_primary_leastOneSecondary"
-        elif (df.ps_2024 == "primary") and (df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes"):
+        elif (df.ps_2024 == "primary") and (df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes" or df.education=="yes"):
             return "full_primary_leastOneSecondary"
         else:
             return "invalid"
 
     def __primPartFunc(self, df):
-        if (df.age_range == "10-14") and (df.primary_only == "invalid") and (df.primary_and_OneSecondary_services == 'invalid') and ((df.hts == "yes" or df.prep == "yes" or df.condom == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes")):
+        if (df.age_range == "10-14") and (df.primary_only == "invalid") and (df.primary_and_OneSecondary_services == 'invalid') and ((df.hts == "yes" or df.prep == "yes" or df.condom == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes" or df.education=="yes")):
             return "primary_part_services"
-        elif (df.age_range == "15-19") and (df.primary_only == "invalid") and (df.primary_and_OneSecondary_services == 'invalid') and (df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes"):
+        elif (df.age_range == "15-19") and (df.primary_only == "invalid") and (df.primary_and_OneSecondary_services == 'invalid') and (df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes" or df.education=="yes"):
             return "primary_part_services"
-        elif (df.age_range == "20-24") and (df.primary_only == "invalid") and (df.primary_and_OneSecondary_services == 'invalid') and ((df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes")):
+        elif (df.age_range == "20-24") and (df.primary_only == "invalid") and (df.primary_and_OneSecondary_services == 'invalid') and ((df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.prep == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.parenting == "yes" or df.contraceptive == "yes" or df.education=="yes")):
             return "primary_part_services"
         else:
             return "invalid"
