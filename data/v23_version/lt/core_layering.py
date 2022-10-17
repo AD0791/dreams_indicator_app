@@ -92,12 +92,9 @@ class LayerServicesData:
     ps_2024: int = base2024[(base2024.ps_2024 == "primary")].id_patient.count()
 
     # schooling
-    # base1014[(base1014.schooling=="yes")].id_patient.count()
-    schooling_1014: None = None
-    # base1519[(base1519.schooling=="yes")].id_patient.count()
-    schooling_1519: None = None
-    # base2024[(base2024.schooling=="yes")].id_patient.count()
-    schooling_2024: None = None
+    schooling_1014 =  base1014[(base1014.education=="yes")].id_patient.count()
+    schooling_1519= base1519[(base1519.education=="yes")].id_patient.count()
+    schooling_2024= base2024[(base2024.education=="yes")].id_patient.count()
     # contraception
     contraceptive_1014: int = base1014[(
         base1014.contraceptive == "yes")].id_patient.count()
