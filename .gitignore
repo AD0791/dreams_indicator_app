@@ -137,6 +137,12 @@ dmypy.json
 
 ./sql
 
-####### keep me
+
+
+
+.legacy/v22
+.legacy/v21/evidence_*
+.legacy/v21/standalone_*
+.legacy/v21/standalone
 
 
