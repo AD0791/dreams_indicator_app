@@ -96,7 +96,7 @@ def comp_2024(df):
 
 
 def complete_at_least(df):
-    return "yes" if (df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.prep == "yes" or df.parenting == "yes" or df.contraceptive == 'yes') else "no"
+    return "yes" if (df.curriculum == "yes" or df.condom == "yes" or df.hts == "yes" or df.post_violence_care == "yes" or df.socioeco_app == "yes" or df.prep == "yes" or df.parenting == "yes" or df.contraceptive == 'yes' or df.education=="yes") else "no"
 
 
 def isEnrolledQ4(date):

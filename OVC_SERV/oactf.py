@@ -44,11 +44,19 @@ SELECT
     d.number_of_condoms_sensibilize,
     d.number_condoms_sensibilization_date_in_the_interval,
     d.number_condoms_reception_in_the_interval,
+    d.number_hiv_test_awareness_date_in_the_interval,
+    d.type_of_test_vih,
+    d.number_autotest_date_in_the_interval,
     d.number_test_date_in_the_interval,
     d.test_results,
+    autotest_result,
+    d.number_hiv_treatment_start_date_in_the_interval,
     d.number_vbg_treatment_date_in_the_interval,
     d.number_gynecological_care_date_in_the_interval,
+    d.number_prep_awareness_date_in_the_interval,
+    d.number_prep_reference_date_in_the_interval,
     d.number_prep_initiation_date_in_the_interval,
+    d.number_contraceptive_sensibilization_date_in_the_interval,
     d.number_contraceptive_reception_in_the_interval,
     c.age_in_year,
     IF(c.age_in_year >= 10
@@ -88,6 +96,9 @@ SELECT
                     AND c.month_in_program <= 24,
                 '13-24 months',
                 '25+ months'))) AS month_in_program_range,
+    IF(sc.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_schooling_payment_in_the_interval,
     IF(e.id_patient IS NOT NULL,
         'yes',
         'no') AS muso,
@@ -140,7 +151,13 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient)) a
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -196,7 +213,21 @@ FROM
                 AND (dhi1.gynecological_care_date IS NOT NULL)) AS number_gynecological_care_date_in_the_interval,
             SUM((dhi1.prep_initiation_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
                 AND (dhi1.prep_initiation_date IS NOT NULL)) AS number_prep_initiation_date_in_the_interval,
-            GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results
+            GROUP_CONCAT(DISTINCT dhi1.test_result, ',') AS test_results,
+            SUM((dhi1.prep_awareness_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (dhi1.prep_awareness_date IS NOT NULL)) AS number_prep_awareness_date_in_the_interval,
+            SUM((dhi1.prep_reference_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (dhi1.prep_reference_date IS NOT NULL)) AS number_prep_reference_date_in_the_interval,
+            SUM((dhi1.contraceptive_sensibilization_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (dhi1.contraceptive_sensibilization_date IS NOT NULL)) AS number_contraceptive_sensibilization_date_in_the_interval,
+            SUM((dhi1.hiv_treatment_start_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (dhi1.hiv_treatment_start_date IS NOT NULL)) AS number_hiv_treatment_start_date_in_the_interval,
+            SUM((dhi1.hiv_test_awareness_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (dhi1.hiv_test_awareness_date IS NOT NULL)) AS number_hiv_test_awareness_date_in_the_interval,
+            GROUP_CONCAT(DISTINCT dhi1.type_of_test, ',') AS type_of_test_vih,
+            SUM((dhi1.autotest_date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (dhi1.autotest_date IS NOT NULL)) AS number_autotest_date_in_the_interval,
+            GROUP_CONCAT(DISTINCT dhi1.autotest_result, ',') AS autotest_result
     FROM
         dream_hivinfos dhi1
     GROUP BY dhi1.id_patient) d ON a.id_patient = d.id_patient
@@ -239,6 +270,14 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
+    LEFT JOIN
+    (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -313,6 +352,8 @@ actif.number_contraceptive_reception_in_the_interval = actif.number_contraceptiv
     int16)
 actif.number_condoms_sensibilization_date_in_the_interval = actif.number_condoms_sensibilization_date_in_the_interval.astype(
     int16)
+
+actif['education'] = actif.has_schooling_payment_in_the_interval
 
 actif['parenting_detailed'] = actif.nbre_parenting_coupe_present.map(
     parenting_detailed)
