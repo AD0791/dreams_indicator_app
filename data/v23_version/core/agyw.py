@@ -5,10 +5,10 @@ from active import actif_served as AGYW_ACTIF
 class AgywPrev:
     """A class with properties and methods given the results of the indicator AGYW_PREV DATIM"""
     __who_am_I = "DATIM"
-    __datim1_title = "Number of individual AGYW that have fully completed the entire DREAMS primary package of services/interventions but no additional services/interventions."
-    __datim2_title = "Number of individual AGYW that have fully completed the entire DREAMS primary package of services/interventions AND at least one secondary service/intervention."
-    __datim3_title = "Number of individual AGYW that have completed at least one DREAMS service/intervention but not the full primary package."
-    __datim4_title = "Number of AGYW that have started a DREAMS service/intervention but have not yet completed it."
+    __datim1_title = "Number of active DREAMS participants that have fully completed the entire DREAMS primary package of services but have not received any services beyond the primary package as of the past 6 months at Q2 or the past 12 months at Q4."
+    __datim2_title = "Number of active DREAMS participants that have fully completed the entire DREAMS primary package of services AND at least one additional secondary service as of the past 6 months at Q2 or the past 12 months at Q4."
+    __datim3_title = "Number of active DREAMS participants that have fully completed at least one DREAMS service/intervention but NOT the full primary package of services/interventions as of the past 6 months at Q2 or the past 12 months at Q4."
+    __datim4_title = "Number of active DREAMS participants that have started a DREAMS service but have not yet completed it in the past 6 months at Q2 or 12 months at Q4."
 
     def __repr__(self):
         return f"<AgywPrev {self.__i_am}>"
@@ -164,14 +164,30 @@ class AgywPrev:
 
     __PERIOD_DATIM = sorted(list(AGYW_ACTIF.month_in_program_range.unique()))
     __PERIOD_DATIM.append("Total")
-    __AGE_DATIM = sorted(list(AGYW_ACTIF.age_range.unique()))[0:3]
+    __AGE_DATIM = sorted(list(AGYW_ACTIF.age_range.unique()))[0:4]
+    
+    def datim_vital_info(self):
+        return DataFrame(
+            {
+                "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
+                    self.__dreams_valid.query("curriculum=='yes'").id_patient.count()
+                ],
+                "Number of active DREAMS participants that received educational support to remain in, advance, and/or rematriculate in school within the reporting period.":[
+                    self.__dreams_valid.query("education=='yes'").id_patient.count()
+                ],
+                "Number of active DREAMS participants that completed a comprehensive economic strengthening intervention within the past 6 months at Q2 or past 12 months at Q4.":[
+                    self.__dreams_valid.query("socioeco_app=='yes'").id_patient.count()
+                ]
+            }
+        )
+    
 
     def datim_agyw_prevI(self):
 
         try:
             pivotableI = self.__agyw_prevI.rename(
-                columns={"age_range": "Age", "month_in_program_range": "Time"})
-            agyw_prevI_pivot = pivotableI.pivot_table(index="Age", columns="Time", values="id_patient",
+                columns={"age_range": "Time/Age/Sex", "month_in_program_range": "Time"})
+            agyw_prevI_pivot = pivotableI.pivot_table(index="Time/Age/Sex", columns="Time", values="id_patient",
                                                       aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
             columns_pivotI = list(agyw_prevI_pivot.columns)
             indexes_pivotI = list(agyw_prevI_pivot.index)
@@ -186,23 +202,35 @@ class AgywPrev:
             agyw_prevI_pivot_final = agyw_prevI_pivot.reset_index().rename_axis(None, axis=1)
             agyw_prevI_results_final = DataFrame(
                 agyw_prevI_pivot_final.to_records(index=False))
+            agyw_prevI_results_final_temp = agyw_prevI_results_final.transpose()
+            agyw_prevI_results_final = agyw_prevI_results_final_temp.reset_index().rename_axis(None, axis=1)
+            agyw_prevI_results_final.rename(columns=agyw_prevI_results_final.iloc[0],inplace=True)
+            agyw_prevI_results_final.drop(agyw_prevI_results_final.index[0],inplace=True)
         except ValueError:
-            agyw_prevI_results_final = DataFrame({"Age": ["10-14", "15-19",
-                                                          "20-24"],
-                                                  "0-6 months": [0, 0, 0],
-                                                  "07-12 months": [0, 0, 0],
-                                                  "13-24 months": [0, 0, 0],
-                                                  "25+ months": [0, 0, 0],
-                                                  "Total": [0, 0, 0]
-                                                  })
+            agyw_prevI_results_final = DataFrame(
+                {
+                    "Time/Age/Sex": [
+                        "0-6 months",
+                        "07-12 months",
+                        "13-24 months",
+                        "25+ months",
+                        "Total"
+                    ],
+                    "10-14":[0,0,0,0,0],
+                    "15-19":[0,0,0,0,0],
+                    "20-24":[0,0,0,0,0],
+                    "25-29":[0,0,0,0,0]
+                }
+            )
+            
         return agyw_prevI_results_final
 
     def datim_agyw_prevII(self):
         try:
             pivotableII = self.__agyw_prevII.rename(
-                columns={"age_range": "Age", "month_in_program_range": "Time"})
+                columns={"age_range": "Time/Age/Sex", "month_in_program_range": "Time"})
             agyw_prevII_pivot = pivotableII.pivot_table(
-                index="Age", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
+                index="Time/Age/Sex", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
             columns_pivotII = list(agyw_prevII_pivot.columns)
             indexes_pivotII = list(agyw_prevII_pivot.index)
             for period in AgywPrev.__PERIOD_DATIM:
@@ -216,23 +244,34 @@ class AgywPrev:
             agyw_prevII_pivot_final = agyw_prevII_pivot.reset_index().rename_axis(None, axis=1)
             agyw_prevII_results_final = DataFrame(
                 agyw_prevII_pivot_final.to_records(index=False))
+            agyw_prevII_results_final_temp = agyw_prevII_results_final.transpose()
+            agyw_prevII_results_final = agyw_prevII_results_final_temp.reset_index().rename_axis(None, axis=1)
+            agyw_prevII_results_final.rename(columns=agyw_prevII_results_final.iloc[0],inplace=True)
+            agyw_prevII_results_final.drop(agyw_prevII_results_final.index[0],inplace=True)
         except ValueError:
-            agyw_prevII_results_final = DataFrame({"Age": ["10-14", "15-19",
-                                                           "20-24"],
-                                                   "0-6 months": [0, 0, 0],
-                                                   "07-12 months": [0, 0, 0],
-                                                   "13-24 months": [0, 0, 0],
-                                                   "25+ months": [0, 0, 0],
-                                                   "Total": [0, 0, 0]
-                                                   })
+            agyw_prevII_results_final = DataFrame(
+                {
+                    "Time/Age/Sex": [
+                        "0-6 months",
+                        "07-12 months",
+                        "13-24 months",
+                        "25+ months",
+                        "Total"
+                    ],
+                    "10-14":[0,0,0,0,0],
+                    "15-19":[0,0,0,0,0],
+                    "20-24":[0,0,0,0,0],
+                    "25-29":[0,0,0,0,0]
+                }
+            )
         return agyw_prevII_results_final
 
     def datim_agyw_prevIII(self):
         try:
             pivotableIII = self.__agyw_prevIII.rename(
-                columns={"age_range": "Age", "month_in_program_range": "Time"})
+                columns={"age_range": "Time/Age/Sex", "month_in_program_range": "Time"})
             agyw_prevIII_pivot = pivotableIII.pivot_table(
-                index="Age", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
+                index="Time/Age/Sex", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
             columns_pivotIII = list(agyw_prevIII_pivot.columns)
             indexes_pivotIII = list(agyw_prevIII_pivot.index)
             for period in AgywPrev.__PERIOD_DATIM:
@@ -246,23 +285,34 @@ class AgywPrev:
             agyw_prevIII_pivot_final = agyw_prevIII_pivot.reset_index().rename_axis(None, axis=1)
             agyw_prevIII_results_final = DataFrame(
                 agyw_prevIII_pivot_final.to_records(index=False))
+            agyw_prevIII_results_final_temp = agyw_prevIII_results_final.transpose()
+            agyw_prevIII_results_final = agyw_prevIII_results_final_temp.reset_index().rename_axis(None, axis=1)
+            agyw_prevIII_results_final.rename(columns=agyw_prevIII_results_final.iloc[0],inplace=True)
+            agyw_prevIII_results_final.drop(agyw_prevIII_results_final.index[0],inplace=True)
         except ValueError:
-            agyw_prevIII_results_final = DataFrame({"Age": ["10-14",                     "15-19",
-                                                            "20-24"],
-                                                    "0-6 months": [0, 0, 0],
-                                                    "07-12 months": [0, 0, 0],
-                                                    "13-24 months": [0, 0, 0],
-                                                    "25+ months": [0, 0, 0],
-                                                    "Total": [0, 0, 0]
-                                                    })
+            agyw_prevIII_results_final = DataFrame(
+                {
+                    "Time/Age/Sex": [
+                        "0-6 months",
+                        "07-12 months",
+                        "13-24 months",
+                        "25+ months",
+                        "Total"
+                    ],
+                    "10-14":[0,0,0,0,0],
+                    "15-19":[0,0,0,0,0],
+                    "20-24":[0,0,0,0,0],
+                    "25-29":[0,0,0,0,0]
+                }
+            )
         return agyw_prevIII_results_final
 
     def datim_agyw_prevIV(self):
         try:
             pivotableIV = self.__agyw_prevIV.rename(
-                columns={"age_range": "Age", "month_in_program_range": "Time"})
+                columns={"age_range": "Time/Age/Sex", "month_in_program_range": "Time"})
             agyw_prevIV_pivot = pivotableIV.pivot_table(
-                index="Age", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
+                index="Time/Age/Sex", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
             columns_pivotIII = list(agyw_prevIV_pivot.columns)
             indexes_pivotIII = list(agyw_prevIV_pivot.index)
             for period in AgywPrev.__PERIOD_DATIM:
@@ -276,15 +326,26 @@ class AgywPrev:
             agyw_prevIV_pivot_final = agyw_prevIV_pivot.reset_index().rename_axis(None, axis=1)
             agyw_prevIV_results_final = DataFrame(
                 agyw_prevIV_pivot_final.to_records(index=False))
+            agyw_prevIV_results_final_temp = agyw_prevIV_results_final.transpose()
+            agyw_prevIV_results_final = agyw_prevIV_results_final_temp.reset_index().rename_axis(None, axis=1)
+            agyw_prevIV_results_final.rename(columns=agyw_prevIV_results_final.iloc[0],inplace=True)
+            agyw_prevIV_results_final.drop(agyw_prevIV_results_final.index[0],inplace=True)
         except ValueError:
-            agyw_prevIV_results_final = DataFrame({"Age": ["10-14",                     "15-19",
-                                                           "20-24"],
-                                                   "0-6 months": [0, 0, 0],
-                                                   "07-12 months": [0, 0, 0],
-                                                   "13-24 months": [0, 0, 0],
-                                                   "25+ months": [0, 0, 0],
-                                                   "Total": [0, 0, 0]
-                                                   })
+            agyw_prevIV_results_final = DataFrame(
+                {
+                    "Time/Age/Sex": [
+                        "0-6 months",
+                        "07-12 months",
+                        "13-24 months",
+                        "25+ months",
+                        "Total"
+                    ],
+                    "10-14":[0,0,0,0,0],
+                    "15-19":[0,0,0,0,0],
+                    "20-24":[0,0,0,0,0],
+                    "25-29":[0,0,0,0,0]
+                }
+            )
         return agyw_prevIV_results_final
 
 
