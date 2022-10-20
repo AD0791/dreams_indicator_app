@@ -170,7 +170,7 @@ class AgywPrev:
         dt = DataFrame.from_dict(
             data ={
                 "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
-                    self.__dreams_valid.query("curriculum=='yes'").id_patient.count()
+                    self.__dreams_valid.query("curriculum=='yes'").id_patient.count() 
                 ],
                 "Number of active DREAMS participants that received educational support to remain in, advance, and/or rematriculate in school within the reporting period.":[
                     self.__dreams_valid.query("education=='yes'").id_patient.count()
@@ -190,8 +190,84 @@ class AgywPrev:
         dt.drop(dt.index[0],inplace=True)
         return dt
 
+    def datim_ArPAP_vital_info(self):
+        dt_ArPAP = DataFrame.from_dict(
+            data ={
+                "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
+                    (self.__dreams_valid.query("curriculum=='yes' & commune=='Port-au-Prince'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Delmas'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Pétionville'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Tabarre'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Gressier'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Kenscoff'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Carrefour'").id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that received educational support to remain in, advance, and/or rematriculate in school within the reporting period.":[
+                    (self.__dreams_valid.query("education =='yes' & commune=='Port-au-Prince'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Delmas'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Pétionville'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Tabarre'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Gressier'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Kenscoff'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Carrefour'").id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that completed a comprehensive economic strengthening intervention within the past 6 months at Q2 or past 12 months at Q4.":[
+                    (self.__dreams_valid.query("socioeco_app =='yes' & commune=='Port-au-Prince'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Delmas'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Pétionville'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Tabarre'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Gressier'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Kenscoff'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Carrefour'").id_patient.count()) if True else 0
+
+                ]
+            }
+        )
+        dt_ArPAP = (
+            dt_ArPAP
+            .transpose()
+            .reset_index()
+            .rename_axis(None,axis=1)
+        )
+        dt_ArPAP.rename(columns=dt_ArPAP.iloc[0],inplace=True)
+        dt_ArPAP.drop(dt_ArPAP.index[0],inplace=True)
+        return dt_ArPAP
         
-    
+    def datim_ArCAP_vital_info(self):
+        dt_ArCAP = DataFrame.from_dict(
+            data ={
+                "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
+                    (self.__dreams_valid.query("curriculum=='yes' & commune=='Cap-Haïtien'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Plaine-du-Nord'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Limonade'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Milot'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Quartier-Morin'").id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that received educational support to remain in, advance, and/or rematriculate in school within the reporting period.":[
+                    (self.__dreams_valid.query("education =='yes' & commune=='Cap-Haïtien'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Plaine-du-Nord'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Limonade'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Milot'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Quartier-Morin'").id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that completed a comprehensive economic strengthening intervention within the past 6 months at Q2 or past 12 months at Q4.":[
+                    (self.__dreams_valid.query("socioeco_app =='yes' & commune=='Cap-Haïtien'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Plaine-du-Nord'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Limonade'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Milot'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Quartier-Morin'").id_patient.count()) if True else 0
+                ]
+            }
+        )
+        dt_ArCAP = (
+            dt_ArCAP
+            .transpose()
+            .reset_index()
+            .rename_axis(None,axis=1)
+        )
+        dt_ArCAP.rename(columns=dt_ArCAP.iloc[0],inplace=True)
+        dt_ArCAP.drop(dt_ArCAP.index[0],inplace=True)
+        return dt_ArCAP
 
     def datim_agyw_prevI(self):
 
