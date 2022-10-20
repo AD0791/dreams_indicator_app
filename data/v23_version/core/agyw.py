@@ -167,8 +167,8 @@ class AgywPrev:
     __AGE_DATIM = sorted(list(AGYW_ACTIF.age_range.unique()))[0:4]
     
     def datim_vital_info(self):
-        return DataFrame(
-            {
+        return DataFrame.from_dict(
+            data ={
                 "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
                     self.__dreams_valid.query("curriculum=='yes'").id_patient.count()
                 ],
@@ -178,7 +178,8 @@ class AgywPrev:
                 "Number of active DREAMS participants that completed a comprehensive economic strengthening intervention within the past 6 months at Q2 or past 12 months at Q4.":[
                     self.__dreams_valid.query("socioeco_app=='yes'").id_patient.count()
                 ]
-            }
+            },
+            orient="index"
         )
     
 
@@ -351,7 +352,7 @@ class AgywPrev:
 
 class AgywPrevCommune(AgywPrev):
     """A class that extend AgywPrev with the purpose of the indicator AGYW_PREV DATIM by commune"""
-    __who_am_I = "DATIM"
+    __who_am_I = "Commune"
 
     def __init__(self, name):
         self.__name = name
