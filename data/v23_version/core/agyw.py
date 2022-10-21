@@ -1,5 +1,6 @@
 from pandas import DataFrame
 from active import actif_served as AGYW_ACTIF
+from siuba import _
 
 
 class AgywPrev:
@@ -268,6 +269,84 @@ class AgywPrev:
         dt_ArCAP.rename(columns=dt_ArCAP.iloc[0],inplace=True)
         dt_ArCAP.drop(dt_ArCAP.index[0],inplace=True)
         return dt_ArCAP
+    
+    def datim_ArSM_vital_info(self):
+        dt_ArSM = DataFrame.from_dict(
+            data ={
+                "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
+                    (self.__dreams_valid.query("curriculum=='yes' & commune=='Saint-Marc'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Verrettes'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Montrouis'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Liancourt'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='La Chapelle'").id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that received educational support to remain in, advance, and/or rematriculate in school within the reporting period.":[
+                    (self.__dreams_valid.query("education =='yes' & commune=='Saint-Marc'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Verrettes'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Montrouis'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Liancourt'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='La Chapelle'").id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that completed a comprehensive economic strengthening intervention within the past 6 months at Q2 or past 12 months at Q4.":[
+                    (self.__dreams_valid.query("socioeco_app =='yes' & commune=='Saint-Marc'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Verrettes'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Montrouis'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Liancourt'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='La Chapelle'").id_patient.count()) if True else 0
+                ]
+            }
+        )
+        dt_ArSM = (
+            dt_ArSM
+            .transpose()
+            .reset_index()
+            .rename_axis(None,axis=1)
+        )
+        dt_ArSM.rename(columns=dt_ArSM.iloc[0],inplace=True)
+        dt_ArSM.drop(dt_ArSM.index[0],inplace=True)
+        return dt_ArSM
+    
+    def datim_ArDESS_vital_info(self):
+        dt_ArDESS = DataFrame.from_dict(
+            data ={
+                "Number of active DREAMS participants that received an evidence-based intervention focused on preventing violence within the reporting period.":[
+                    (self.__dreams_valid.query("curriculum=='yes' & commune=='Dessalines'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Desdunes'").id_patient.count() + \
+                    self.__dreams_valid.query("curriculum=='yes' & commune=='Grande Saline'").id_patient.count() + \
+                    self.__dreams_valid[
+                        (_.commune == "Petite Rivière de l'Artibonite") &
+                        (_.education == "yes")  
+                    ].id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that received educational support to remain in, advance, and/or rematriculate in school within the reporting period.":[
+                    (self.__dreams_valid.query("education =='yes' & commune=='Dessalines'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Desdunes'").id_patient.count() + \
+                    self.__dreams_valid.query("education =='yes' & commune=='Grande Saline'").id_patient.count() + \
+                    self.__dreams_valid[
+                        (_.commune == "Petite Rivière de l'Artibonite") &
+                        (_.education == "yes")  
+                    ].id_patient.count()) if True else 0
+                ],
+                "Number of active DREAMS participants that completed a comprehensive economic strengthening intervention within the past 6 months at Q2 or past 12 months at Q4.":[
+                    (self.__dreams_valid.query("socioeco_app =='yes' & commune=='Dessalines'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Desdunes'").id_patient.count() + \
+                    self.__dreams_valid.query("socioeco_app =='yes' & commune=='Grande Saline'").id_patient.count() + \
+                    self.__dreams_valid[
+                        (_.commune == "Petite Rivière de l'Artibonite") &
+                        (_.socioeco_app == "yes")  
+                    ].id_patient.count()) if True else 0
+                ]
+            }
+        )
+        dt_ArDESS = (
+            dt_ArDESS
+            .transpose()
+            .reset_index()
+            .rename_axis(None,axis=1)
+        )
+        dt_ArDESS.rename(columns=dt_ArDESS.iloc[0],inplace=True)
+        dt_ArDESS.drop(dt_ArDESS.index[0],inplace=True)
+        return dt_ArDESS
 
     def datim_agyw_prevI(self):
 
