@@ -7,7 +7,7 @@ class AgywPrev:
     """A class with properties and methods given the results of the indicator AGYW_PREV DATIM"""
     __who_am_I = "DATIM"
     __datim1_title = "Number of active DREAMS participants that have fully completed the entire DREAMS primary package of services but have not received any services beyond the primary package as of the past 6 months at Q2 or the past 12 months at Q4."
-    __datim2_title = "Number of active DREAMS participants that have fully completed the entire DREAMS primary package of services AND at least one additional secondary service as of the past 6 months at Q2 or the past 12 months at Q4."
+    __datim2_title = "Number of active DREAMS participants that have fully completed the entire DREAMS primary package of services AND at least one additional secondary service as of the past 6 months at Q2 or the past 12 months at Q4."
     __datim3_title = "Number of active DREAMS participants that have fully completed at least one DREAMS service/intervention but NOT the full primary package of services/interventions as of the past 6 months at Q2 or the past 12 months at Q4."
     __datim4_title = "Number of active DREAMS participants that have started a DREAMS service but have not yet completed it in the past 6 months at Q2 or 12 months at Q4."
 
