@@ -27,7 +27,7 @@ class Set_date(Enum):
     
     period_start = "2022-10-01"
     period_end = datetime.today().strftime('%Y-%m-%d')
-    #period_end = "2020-02-29"
+    #period_end = "2022-11-31"
     
     #master_start = "2017-10-01"
     #master_end = "2020-11-31"
