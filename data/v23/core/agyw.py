@@ -479,13 +479,13 @@ class AgywPrev:
                 columns={"age_range": "Time/Age/Sex", "month_in_program_range": "Time"})
             agyw_prevIV_pivot = pivotableIV.pivot_table(
                 index="Time/Age/Sex", columns="Time", values="id_patient", aggfunc="count", fill_value=0, margins=True, margins_name="Total", dropna=False)[:-1]
-            columns_pivotIII = list(agyw_prevIV_pivot.columns)
-            indexes_pivotIII = list(agyw_prevIV_pivot.index)
+            columns_pivotIV = list(agyw_prevIV_pivot.columns)
+            indexes_pivotIV = list(agyw_prevIV_pivot.index)
             for period in AgywPrev.__PERIOD_DATIM:
-                if period not in columns_pivotIII:
+                if period not in columns_pivotIV:
                     agyw_prevIV_pivot[period] = 0
             for age in AgywPrev.__AGE_DATIM:
-                if age not in indexes_pivotIII:
+                if age not in indexes_pivotIV:
                     agyw_prevIV_pivot.loc[age] = 0
             agyw_prevIV_pivot = agyw_prevIV_pivot.reindex(
                 index=AgywPrev.__AGE_DATIM, columns=AgywPrev.__PERIOD_DATIM)
