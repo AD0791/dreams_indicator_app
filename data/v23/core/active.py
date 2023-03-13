@@ -1,6 +1,6 @@
 from typing import Set
 import pymysql
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from datetime import datetime
 from decouple import config
 from dotenv import load_dotenv
@@ -579,8 +579,8 @@ FROM
 """
 
 
-agyw_served_period = pd.read_sql_query(query_period, engine, parse_dates=True)
-agyw_served = pd.read_sql_query(query_master, engine, parse_dates=True)
+agyw_served_period = pd.read_sql_query(text(query_period), engine.connect(), parse_dates=True)
+agyw_served = pd.read_sql_query(text(query_master), engine.connect(), parse_dates=True)
 
 # close the pool of connection
 engine.dispose()
