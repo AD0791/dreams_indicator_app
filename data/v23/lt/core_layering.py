@@ -1,5 +1,5 @@
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pydantic.dataclasses import dataclass as pdt
 from typing import TypeVar
 from agyw_path import *
@@ -23,14 +23,18 @@ base_table = base.pivot_table(index='age_range', values='id_patient', columns='d
                               )[:-1]
 base_table = base_table.reset_index().rename_axis(None, axis=1)
 base_table = DataFrame(base_table.to_records(index=False))
+base1014: DF = base[base.age_range == "10-14"]
+base1519: DF = base[base.age_range == "15-19"]
+base2024: DF = base[base.age_range == "20-24"]
 
 
 @dataclass
 class LayerServicesData:
     """convey the proper services data given for the time"""
-    base1014: DF = base[base.age_range == "10-14"]
-    base1519: DF = base[base.age_range == "15-19"]
-    base2024: DF = base[base.age_range == "20-24"]
+    #base1014: DF = field(default_factory=lambda: base[base.age_range == "10-14"])
+    #base1519: DF = field( default_factory=lambda:base[base.age_range == "15-19"])
+    #base2024: DF = field(default_factory=lambda: base[base.age_range == "20-24"])
+    
     # CURRICULUM
     curriculum_1014: int = base1014[(
         base1014.curriculum == "yes")].id_patient.count()
