@@ -1,6 +1,7 @@
 from typing import Set
 import pymysql
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
+from datetime import datetime
 from decouple import config
 from dotenv import load_dotenv
 import pandas as pd
@@ -18,11 +19,20 @@ HOSTNAME = config('HOSTCaris')
 DBNAME = config('DBCaris')
 
 
+
 class Set_date(Enum):
     master_start = "2017-10-01"
-    master_end = "2022-09-31"
-    period_start = "2021-10-01"
-    period_end = "2022-09-31"
+    master_end = datetime.today().strftime('%Y-%m-%d')
+    #master_end = "2020-02-29"
+    
+    period_start = "2022-10-01"
+    period_end = datetime.today().strftime('%Y-%m-%d')
+    #period_end = "2022-11-31"
+    
+    #master_start = "2017-10-01"
+    #master_end = "2020-11-31"
+    #period_start = "2020-10-01"
+    #period_end = "2020-11-31"
 
 
 # get the engine to connect and fetch
@@ -94,6 +104,9 @@ SELECT
                     AND c.month_in_program <= 24,
                 '13-24 months',
                 '25+ months'))) AS month_in_program_range,
+    IF(sc.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_schooling_payment_in_the_interval,
     IF(e.id_patient IS NOT NULL,
         'yes',
         'no') AS muso,
@@ -146,7 +159,13 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient)) a
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -259,6 +278,14 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
+    LEFT JOIN
+    (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -347,6 +374,9 @@ SELECT
                     AND c.month_in_program <= 24,
                 '13-24 months',
                 '25+ months'))) AS month_in_program_range,
+    IF(sc.id_patient IS NOT NULL,
+        'yes',
+        'no') AS has_schooling_payment_in_the_interval,
     IF(e.id_patient IS NOT NULL,
         'yes',
         'no') AS muso,
@@ -399,7 +429,13 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient)) a
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+            AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -512,6 +548,14 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
+    LEFT JOIN
+    (SELECT 
+        ds.id_patient
+    FROM
+        caris_db.dreams_schooling ds
+    WHERE
+        ds.closed = FALSE AND ds.eskew_peye = 1
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -535,8 +579,8 @@ FROM
 """
 
 
-agyw_served_period = pd.read_sql_query(query_period, engine, parse_dates=True)
-agyw_served = pd.read_sql_query(query_master, engine, parse_dates=True)
+agyw_served_period = pd.read_sql_query(text(query_period), engine.connect(), parse_dates=True)
+agyw_served = pd.read_sql_query(text(query_master), engine.connect(), parse_dates=True)
 
 # close the pool of connection
 engine.dispose()
@@ -608,6 +652,9 @@ actif_served.number_contraceptive_sensibilization_date_in_the_interval = actif_s
     int16)
 
 # services
+
+actif_served['education'] = actif_served.has_schooling_payment_in_the_interval
+
 actif_served['parenting_detailed'] = actif_served.nbre_parenting_coupe_present.map(
     parenting_detailed)
 actif_served['parenting'] = actif_served.nbre_parenting_coupe_present.map(
@@ -657,6 +704,9 @@ actif_served['contraceptive'] = actif_served.number_contraceptive_reception_in_t
 actif_served['ps_1014'] = actif_served.apply(lambda df: prim_1014(df), axis=1)
 actif_served['ps_1519'] = actif_served.apply(lambda df: prim_1519(df), axis=1)
 actif_served['ps_2024'] = actif_served.apply(lambda df: prim_2024(df), axis=1)
+
+
+
 
 """
 actif_served['secondary_1014'] = actif_served.apply(lambda df: sec_1014(df),axis=1 )

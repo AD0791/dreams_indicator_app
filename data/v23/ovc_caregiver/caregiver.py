@@ -1,7 +1,7 @@
 from cgfunc import ovc_age, gender, age_to_correct
 from decouple import config
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 import pymysql
 from core.agyw import AgywPrev
 from pandas import read_excel, Int32Dtype, read_sql_query
@@ -43,8 +43,7 @@ parent_fap['age_ovc'] = parent_fap.age_paran.map(ovc_age)
 parent_fap['age_status'] = parent_fap.age_paran.map(age_to_correct)
 parent_fap.Gender = parent_fap.Gender.map(gender)
 
-parents = parent_fap[['code', 'non_paran_responsab',
-                      'Gender', 'commune', 'age_paran', 'age_ovc', 'age_status']]
+parents = parent_fap[['code', 'non_paran_responsab', 'Gender', 'commune', 'age_paran', 'age_ovc', 'age_status']]
 
 
 # parenting served in the Quarter
@@ -132,7 +131,7 @@ FROM
     lookup_departement ld ON ld.id = lc.departement
 '''
 
-sdata = read_sql_query(query, engine, parse_dates=True)
+sdata = read_sql_query(text(query), engine.connect(), parse_dates=True)
 # get the test excel file from Query
 
 # close the pool of connection
