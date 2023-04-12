@@ -1,5 +1,5 @@
 import pymysql
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from decouple import config
 from dotenv import load_dotenv
 from pandas import to_datetime, read_sql_query
@@ -10,6 +10,7 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import os
+from siuba import _
 
 
 from ofunc import *
@@ -23,8 +24,8 @@ DBNAME = config('DBCaris')
 
 
 class Set_date(Enum):
-    period_start = "2021-10-01"
-    period_end = "2022-09-31"
+    period_start = "2022-10-01"
+    period_end = "2023-03-31"
 
 
 # get the engine to connect and fetch
@@ -310,17 +311,97 @@ FROM
     caris_db.patient;
 """
 
-query = '''
+query = f"""
 SELECT 
-    dm.id_patient as id_patient,
     d.case_id,
+    dm.id_patient AS id_patient,
     p.patient_code AS code,
     d.a_non_patisipan_an AS first_name,
     d.b_siyati AS last_name,
     TIMESTAMPDIFF(YEAR,
         d.nan_ki_dat_ou_fet,
-        now()) AS age,
+        NOW()) AS age,
+    IF(TIMESTAMPDIFF(YEAR,
+            d.nan_ki_dat_ou_fet,
+            NOW()) >= 10
+            AND TIMESTAMPDIFF(YEAR,
+            d.nan_ki_dat_ou_fet,
+            NOW()) <= 14,
+        '10-14',
+        IF(TIMESTAMPDIFF(YEAR,
+                d.nan_ki_dat_ou_fet,
+                NOW()) >= 15
+                AND TIMESTAMPDIFF(YEAR,
+                d.nan_ki_dat_ou_fet,
+                NOW()) <= 19,
+            '15-19',
+            IF(TIMESTAMPDIFF(YEAR,
+                    d.nan_ki_dat_ou_fet,
+                    NOW()) >= 20
+                    AND TIMESTAMPDIFF(YEAR,
+                    d.nan_ki_dat_ou_fet,
+                    NOW()) <= 24,
+                '20-24',
+                IF(TIMESTAMPDIFF(YEAR,
+                        d.nan_ki_dat_ou_fet,
+                        NOW()) >= 25
+                        AND TIMESTAMPDIFF(YEAR,
+                        d.nan_ki_dat_ou_fet,
+                        NOW()) <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS age_range,
+    IF(TIMESTAMPDIFF(YEAR,
+            d.nan_ki_dat_ou_fet,
+            NOW()) >= 10
+            AND TIMESTAMPDIFF(YEAR,
+            d.nan_ki_dat_ou_fet,
+            NOW()) <= 14,
+        '10-14',
+        IF(TIMESTAMPDIFF(YEAR,
+                d.nan_ki_dat_ou_fet,
+                NOW()) >= 15
+                AND TIMESTAMPDIFF(YEAR,
+                d.nan_ki_dat_ou_fet,
+                NOW()) <= 17,
+            '15-17',
+            IF(TIMESTAMPDIFF(YEAR,
+                    d.nan_ki_dat_ou_fet,
+                    NOW()) >= 18
+                    AND TIMESTAMPDIFF(YEAR,
+                    d.nan_ki_dat_ou_fet,
+                    NOW()) <= 24,
+                '18-24',
+                IF(TIMESTAMPDIFF(YEAR,
+                        d.nan_ki_dat_ou_fet,
+                        NOW()) >= 25
+                        AND TIMESTAMPDIFF(YEAR,
+                        d.nan_ki_dat_ou_fet,
+                        NOW()) <= 29,
+                    '25-29',
+                    'not_valid_age')))) AS ovc_age,
     d.nan_ki_dat_ou_fet AS dob,
+    IF(TIMESTAMPDIFF(MONTH,
+            d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817,
+            NOW()) >= 0
+            AND TIMESTAMPDIFF(MONTH,
+            d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817,
+            NOW()) <= 6,
+        '0-6 months',
+        IF(TIMESTAMPDIFF(MONTH,
+                d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817,
+                NOW()) >= 7
+                AND TIMESTAMPDIFF(MONTH,
+                d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817,
+                NOW()) <= 12,
+            '07-12 months',
+            IF(TIMESTAMPDIFF(MONTH,
+                    d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817,
+                    NOW()) >= 13
+                    AND TIMESTAMPDIFF(MONTH,
+                    d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817,
+                    NOW()) <= 24,
+                '13-24 months',
+                '25+ months'))) AS month_in_program_range,
     d.a1_dat_entvyou_a_ft_jjmmaa_egz_010817 AS interview_date,
     d.e__telefn,
     d.d_adrs AS adress,
@@ -361,13 +442,17 @@ FROM
     lookup_commune lc ON lc.id = dh.commune
         LEFT JOIN
     lookup_departement ld ON ld.id = lc.departement
-'''
+"""
 
 
-patient = read_sql_query(patient_query, engine, parse_dates=True)
-actif = read_sql_query(query_period, engine, parse_dates=True)
-sdata= read_sql_query(query,engine,parse_dates=True)
-SDATA = sdata[sdata.total>=14]
+patient = read_sql_query(text(patient_query), engine.connect(), parse_dates=True)
+actif = read_sql_query(text(query_period), engine.connect(), parse_dates=True)
+sdata= read_sql_query(text(query),engine.connect(),parse_dates=True)
+SDATA = sdata[
+    (_.total >= 14)&
+    (_.age_range!="not_valid_age")&
+    (_.age_range!="25_29")
+]
 
 
 
@@ -458,7 +543,7 @@ actif.date_interview = to_datetime(actif.date_interview)
 
 actif['complete_at_least'] = actif.apply(
     lambda df: complete_at_least(df), axis=1)
-actif['isEnrolledQ4'] = actif.date_interview.map(isEnrolledQ4)
+actif['isEnrolledQ2'] = actif.date_interview.map(isEnrolledQ2)
 
 # schooling
 #Connecting to Commcare
