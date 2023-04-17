@@ -22,12 +22,13 @@ DBNAME = config('DBCaris')
 
 class Set_date(Enum):
     master_start = "2017-10-01"
-    master_end = datetime.today().strftime('%Y-%m-%d')
+    #master_end = datetime.today().strftime('%Y-%m-%d')
+    master_end = "2023-03-31"
     #master_end = "2020-02-29"
     
     period_start = "2022-10-01"
-    period_end = datetime.today().strftime('%Y-%m-%d')
-    #period_end = "2022-11-31"
+    #period_end = datetime.today().strftime('%Y-%m-%d')
+    period_end = "2023-03-31"
     
     #master_start = "2017-10-01"
     #master_end = "2020-11-31"
