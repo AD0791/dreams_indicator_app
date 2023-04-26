@@ -287,7 +287,8 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')) sc ON sc.id_patient = a.id_patient
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -309,7 +310,6 @@ FROM
         dga.value = 'P'
             AND dgs.date < '{Set_date.period_start.value}')) past ON past.id_patient = a.id_patient
 """
-
 
 query_master = f"""
 SELECT 
@@ -557,7 +557,8 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')) sc ON sc.id_patient = a.id_patient
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -579,7 +580,6 @@ FROM
         dga.value = 'P'
             AND dgs.date < '{Set_date.master_start.value}')) past ON past.id_patient = a.id_patient
 """
-
 
 agyw_served_period = pd.read_sql_query(text(query_period), engine.connect(), parse_dates=True)
 agyw_served = pd.read_sql_query(text(query_master), engine.connect(), parse_dates=True)

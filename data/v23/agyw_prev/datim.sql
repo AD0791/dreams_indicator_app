@@ -249,7 +249,9 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN @start_date AND @end_date)) sc ON sc.id_patient = a.id_patient
+        AND (ds.dat_peyman_fet BETWEEN @start_date AND @end_date)
+        group by ds.id_patient
+    ) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
