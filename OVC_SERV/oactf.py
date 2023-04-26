@@ -278,7 +278,9 @@ FROM
         caris_db.dreams_schooling ds
     WHERE
         ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')) sc ON sc.id_patient = a.id_patient
+        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        group by ds.id_patient
+    ) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
