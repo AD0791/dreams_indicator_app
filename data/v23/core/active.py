@@ -590,30 +590,23 @@ actif_served = agyw_served[agyw_served.id_patient.isin(agyw_served_period.id_pat
 actif_served.type_of_test_vih.fillna('no', inplace=True)
 actif_served.test_results.fillna('0,', inplace=True)
 actif_served.autotest_result.fillna('no', inplace=True)
+actif_served.has_comdom_topic.fillna('no', inplace=True)
 
 actif_served.nbre_pres_for_inter.fillna(0, inplace=True)
-actif_served.has_comdom_topic.fillna('no', inplace=True)
 actif_served.number_of_condoms_sensibilize.fillna(0, inplace=True)
 actif_served.number_condoms_reception_in_the_interval.fillna(0, inplace=True)
 actif_served.number_test_date_in_the_interval.fillna(0, inplace=True)
-actif_served.number_gynecological_care_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_served.number_gynecological_care_date_in_the_interval.fillna(0, inplace=True)
 actif_served.number_vbg_treatment_date_in_the_interval.fillna(0, inplace=True)
-actif_served.number_prep_initiation_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_served.number_prep_initiation_date_in_the_interval.fillna(0, inplace=True)
 actif_served.nbre_parenting_coupe_present.fillna(0, inplace=True)
-actif_served.number_contraceptive_reception_in_the_interval.fillna(
-    0, inplace=True)
-actif_served.number_condoms_sensibilization_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_served.number_contraceptive_reception_in_the_interval.fillna(0, inplace=True)
+actif_served.number_condoms_sensibilization_date_in_the_interval.fillna(0, inplace=True)
 actif_served.number_prep_awareness_date_in_the_interval.fillna(0, inplace=True)
 actif_served.number_prep_reference_date_in_the_interval.fillna(0, inplace=True)
-actif_served.number_hiv_test_awareness_date_in_the_interval.fillna(
-    0, inplace=True)
-actif_served.number_hiv_treatment_start_date_in_the_interval.fillna(
-    0, inplace=True)
-actif_served.number_contraceptive_sensibilization_date_in_the_interval.fillna(
-    0, inplace=True)
+actif_served.number_hiv_test_awareness_date_in_the_interval.fillna(0, inplace=True)
+actif_served.number_hiv_treatment_start_date_in_the_interval.fillna( 0, inplace=True)
+actif_served.number_contraceptive_sensibilization_date_in_the_interval.fillna(0, inplace=True)
 
 actif_served.nbre_pres_for_inter = actif_served.nbre_pres_for_inter.astype(
     int16)
