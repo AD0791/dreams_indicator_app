@@ -1,5 +1,5 @@
 use caris_db;
-#set @start_date="2017-10-01";
+set @start_date="2017-10-01";
 set @start_date="2022-10-01";
 set @end_date="2023-04-31";
 
