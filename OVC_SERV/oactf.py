@@ -25,7 +25,7 @@ DBNAME = config('DBCaris')
 
 class Set_date(Enum):
     period_start = "2022-10-01"
-    period_end = "2023-03-31"
+    period_end = "2023-08-31"
 
 
 # get the engine to connect and fetch
@@ -554,7 +554,8 @@ email = os.getenv('COMCARE_EMAIL')
 password_cc = os.getenv('COMCARE_PASSWORD')
 
 #Defining the driver
-driver = webdriver.Chrome(ChromeDriverManager().install())
+#driver = webdriver.Chrome(ChromeDriverManager().install())
+driver = webdriver.Chrome()
 driver.implicitly_wait(1000)
 
 #Creating login function

@@ -28,7 +28,8 @@ parent_fap.rename(
         "form.anrejistreman_patisipan.non_paran_responsab":"non_paran_responsab",
         "form.anrejistreman_patisipan.seks":"Gender",
         "form.anrejistreman_patisipan.laj_paran_responsab":"age_paran",
-        "form.anrejistreman_patisipan.komin_patisipan":"commune"
+        "form.anrejistreman_patisipan.komin_patisipan":"commune",
+        "form.anrejistreman_patisipan.telechaje_fom_konsantman_an_sou_commcare": "photo_konsantman"
     },
     inplace=True
 )
@@ -36,14 +37,14 @@ parent_fap.rename(
 
 parent_fap = parent_fap.drop_duplicates('code').reset_index(drop = True)
 
-
+parent_fap["photo_konsantman"].fillna("---",inplace=True)
 parent_fap.age_paran = parent_fap.age_paran.astype(Int32Dtype())
 parent_fap.age_paran.fillna(-1, inplace=True)
 parent_fap['age_ovc'] = parent_fap.age_paran.map(ovc_age)
 parent_fap['age_status'] = parent_fap.age_paran.map(age_to_correct)
 parent_fap.Gender = parent_fap.Gender.map(gender)
 
-parents = parent_fap[['code', 'non_paran_responsab', 'Gender', 'commune', 'age_paran', 'age_ovc', 'age_status']]
+parents = parent_fap[['code', 'photo_konsantman','non_paran_responsab', 'Gender', 'commune', 'age_paran', 'age_ovc', 'age_status']]
 
 
 # parenting served in the Quarter

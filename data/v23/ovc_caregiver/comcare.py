@@ -15,7 +15,8 @@ email = os.getenv('COMCARE_EMAIL')
 password_cc = os.getenv('COMCARE_PASSWORD')
 
 #Defining the driver
-driver = webdriver.Chrome(ChromeDriverManager().install())
+#driver = webdriver.Chrome(ChromeDriverManager().install())
+driver = webdriver.Chrome()
 driver.implicitly_wait(1000)
 
 #Creating login function
