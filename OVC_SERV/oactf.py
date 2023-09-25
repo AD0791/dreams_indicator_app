@@ -25,7 +25,7 @@ DBNAME = config('DBCaris')
 
 class Set_date(Enum):
     period_start = "2022-10-01"
-    period_end = "2023-08-31"
+    period_end = "2023-09-25"
 
 
 # get the engine to connect and fetch
