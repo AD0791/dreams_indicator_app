@@ -25,7 +25,7 @@ DBNAME = config('DBCaris')
 
 class Set_date(Enum):
     period_start = "2022-10-01"
-    period_end = "2023-09-25"
+    period_end = "2023-09-30"
 
 
 # get the engine to connect and fetch
@@ -545,7 +545,10 @@ actif.date_interview = to_datetime(actif.date_interview)
 
 actif['complete_at_least'] = actif.apply(
     lambda df: complete_at_least(df), axis=1)
+# please  - reviser la necessite de cette fonction
 actif['isEnrolledQ2'] = actif.date_interview.map(isEnrolledQ2)
+# please - reviser la necessite de cette fonction
+actif['isEnrolledQ4'] = actif.date_interview.map(isEnrolledQ4)
 
 # schooling
 #Connecting to Commcare
