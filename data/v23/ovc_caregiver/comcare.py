@@ -8,6 +8,8 @@ import os
 #path.insert(0, '../core')
 from decouple import config
 from dotenv import load_dotenv
+import chromedriver_autoinstaller as chai
+chai.install()
 
 
 load_dotenv('id_cc.env')

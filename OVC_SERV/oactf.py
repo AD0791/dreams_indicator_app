@@ -558,6 +558,8 @@ password_cc = os.getenv('COMCARE_PASSWORD')
 
 #Defining the driver
 #driver = webdriver.Chrome(ChromeDriverManager().install())
+import chromedriver_autoinstaller as chai
+chai.install()
 driver = webdriver.Chrome()
 driver.implicitly_wait(1000)
 
