@@ -146,3 +146,4 @@ dmypy.json
 .legacy/v21/standalone
 
 
+*.env
