@@ -15,7 +15,7 @@ from siuba import _
 
 from ofunc import *
 
-load_dotenv()
+load_dotenv("../aws.env")
 # get the environment variables needed
 USER = config('USRCaris')
 PASSWORD = config('PASSCaris')
@@ -24,8 +24,8 @@ DBNAME = config('DBCaris')
 
 
 class Set_date(Enum):
-    period_start = "2022-10-01"
-    period_end = "2023-09-30"
+    period_start = "2023-10-01"
+    period_end = "2024-09-30"
 
 
 # get the engine to connect and fetch
@@ -552,7 +552,7 @@ actif['isEnrolledQ4'] = actif.date_interview.map(isEnrolledQ4)
 
 # schooling
 #Connecting to Commcare
-load_dotenv('id_cc.env')
+load_dotenv('./id_cc.env')
 email = os.getenv('COMCARE_EMAIL')
 password_cc = os.getenv('COMCARE_PASSWORD')
 

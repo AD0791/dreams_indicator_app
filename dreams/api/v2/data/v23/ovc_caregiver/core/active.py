@@ -10,7 +10,7 @@ from enum import Enum
 
 from core.functions import *
 
-load_dotenv()
+load_dotenv("../id_cc.env")
 
 # get the environment variables needed
 USER = config('USRCaris')

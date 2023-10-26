@@ -10,7 +10,7 @@ from enum import Enum
 
 from .functions import *
 
-load_dotenv()
+load_dotenv("../../aws.env")
 
 # get the environment variables needed
 USER = config('USRCaris')
