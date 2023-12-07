@@ -163,12 +163,12 @@ FROM
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
     GROUP BY dmx.id_patient) UNION (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
-    WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
+            dmsch.id_patient
+        FROM
+            schooling_dreams sd
+        LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
+        WHERE
+            ((sd.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}') AND (sd.closed = 0)) GROUP BY dmsch.id_patient))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -264,8 +264,8 @@ FROM
         dream_member dmy
     LEFT JOIN dream_group dg ON dg.id = dmy.id_group
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
-    LEFT JOIN lookup_commune lc ON lc.id = dh.commune
-    LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
+    LEFT JOIN lookup_commune_old lc ON lc.id = dh.commune
+    LEFT JOIN lookup_departement_old ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
     (SELECT 
         dpga.id_patient,
@@ -283,13 +283,14 @@ FROM
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
     LEFT JOIN
     (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
-    WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
+            dmscho.id_patient
+        FROM
+            schooling_dreams ds
+        LEFT JOIN dream_member dmscho ON dmscho.case_id = ds.parent_id
+        WHERE
+            ((ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+                AND (ds.closed = 0))
+        GROUP BY dmscho.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -433,12 +434,14 @@ FROM
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
     GROUP BY dmx.id_patient) UNION (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
-    WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'))) a
+            dmsch.id_patient
+        FROM
+            schooling_dreams sd
+        LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
+        WHERE
+            ((sd.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+                AND (sd.closed = 0))
+        GROUP BY dmsch.id_patient))) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -534,8 +537,8 @@ FROM
         dream_member dmy
     LEFT JOIN dream_group dg ON dg.id = dmy.id_group
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
-    LEFT JOIN lookup_commune lc ON lc.id = dh.commune
-    LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
+    LEFT JOIN lookup_commune_old lc ON lc.id = dh.commune
+    LEFT JOIN lookup_departement_old ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
     (SELECT 
         dpga.id_patient,
@@ -553,13 +556,14 @@ FROM
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
     LEFT JOIN
     (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
-    WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
+            dmscho.id_patient
+        FROM
+            schooling_dreams ds
+        LEFT JOIN dream_member dmscho ON dmscho.case_id = ds.parent_id
+        WHERE
+            ((ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+                AND (ds.closed = 0))
+        GROUP BY dmscho.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
