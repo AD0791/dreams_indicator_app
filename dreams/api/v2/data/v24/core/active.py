@@ -264,8 +264,8 @@ FROM
         dream_member dmy
     LEFT JOIN dream_group dg ON dg.id = dmy.id_group
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
-    LEFT JOIN lookup_commune_old lc ON lc.id = dh.commune
-    LEFT JOIN lookup_departement_old ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
+    LEFT JOIN lookup_commune lc ON lc.id = dh.commune
+    LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
     (SELECT 
         dpga.id_patient,
@@ -534,8 +534,8 @@ FROM
         dream_member dmy
     LEFT JOIN dream_group dg ON dg.id = dmy.id_group
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
-    LEFT JOIN lookup_commune_old lc ON lc.id = dh.commune
-    LEFT JOIN lookup_departement_old ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
+    LEFT JOIN lookup_commune lc ON lc.id = dh.commune
+    LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
     (SELECT 
         dpga.id_patient,
