@@ -701,7 +701,6 @@ actif_served['ps_2024'] = actif_served.apply(lambda df: prim_2024(df), axis=1)
 
 
 
-
 """
 actif_served['secondary_1014'] = actif_served.apply(lambda df: sec_1014(df),axis=1 )
 actif_served['secondary_1519'] = actif_served.apply(lambda df: sec_1519(df),axis=1 )
@@ -710,3 +709,4 @@ actif_served['complete_1014'] = actif_served.apply(lambda df: comp_1014(df),axis
 actif_served['complete_1519'] = actif_served.apply(lambda df: comp_1519(df),axis=1 )
 actif_served['complete_2024'] = actif_served.apply(lambda df: comp_2024(df),axis=1 )
 """
+
