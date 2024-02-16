@@ -1,7 +1,6 @@
 use caris_db;
-#set @start_date="2017-10-01";
-set @start_date="2022-10-01";
-set @end_date="2023-10-30";
+set @start_date="2023-10-01";
+set @end_date="2024-09-30";
 
 
 SELECT 
@@ -124,14 +123,14 @@ FROM
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
     GROUP BY dmx.id_patient) UNION (SELECT 
-        dmscho.id_patient
+        dmsch.id_patient
     FROM
         schooling_dreams sd
-    LEFT JOIN dream_member dmscho ON dmscho.case_id = sd.parent_id
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
         ((sd.dat_peyman_fet BETWEEN @date_start AND @date_end)
             AND (sd.closed = 0))
-    GROUP BY dmscho.id_patient)) a
+    GROUP BY dmsch.id_patient)) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -227,8 +226,8 @@ FROM
         dream_member dmy
     LEFT JOIN dream_group dg ON dg.id = dmy.id_group
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
-    LEFT JOIN lookup_commune_old lc ON lc.id = dh.commune
-    LEFT JOIN lookup_departement_old ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
+    LEFT JOIN lookup_commune lc ON lc.id = dh.commune
+    LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
     (SELECT 
         dpga.id_patient,
@@ -248,11 +247,11 @@ FROM
     (SELECT 
         dmsch.id_patient
     FROM
-        schooling_dreams ds
-    LEFT JOIN dream_member dmsch ON dmsch.case_id = ds.parent_id
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
-        ((ds.dat_peyman_fet BETWEEN @date_start AND @date_end)
-            AND (ds.closed = 0))
+        ((sd.dat_peyman_fet BETWEEN @date_start AND @date_end)
+            AND (sd.closed = 0))
     GROUP BY dmsch.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
