@@ -162,13 +162,18 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient) UNION (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
     WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
+    (gbx.date_modified BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        AND (gbx.date_closed IS NULL)
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        dmsch.id_patient
+    FROM
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
+    WHERE
+        ((sd.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            AND (sd.closed = 0))
+    GROUP BY dmsch.id_patient)) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -251,12 +256,17 @@ FROM
     GROUP BY dm2.id_patient) e ON a.id_patient = e.id_patient
         LEFT JOIN
     (SELECT 
-        dm3.id_patient
-    FROM
-        dream_member dm3
-    INNER JOIN patient p1 ON p1.id = dm3.id_patient
-    INNER JOIN gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
-    GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
+    dm3.id_patient
+FROM
+    dream_member dm3
+        INNER JOIN
+    patient p1 ON p1.id = dm3.id_patient
+        INNER JOIN
+    gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
+WHERE
+    (gb.date_modified BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        AND (gb.date_closed IS NULL)
+GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
         LEFT JOIN
     (SELECT 
         dmy.id_patient, lc.name AS commune, ld.name AS departement
@@ -281,15 +291,16 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
-    LEFT JOIN
+        LEFT JOIN
     (SELECT 
-        ds.id_patient
+        dmsch.id_patient
     FROM
-        caris_db.dreams_schooling ds
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
+        ((sd.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            AND (sd.closed = 0))
+    GROUP BY dmsch.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -310,6 +321,7 @@ FROM
     WHERE
         dga.value = 'P'
             AND dgs.date < '{Set_date.period_start.value}')) past ON past.id_patient = a.id_patient
+
 """
 
 query_master = f"""
@@ -432,13 +444,18 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient) UNION (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
     WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'))) a
+    (gbx.date_modified BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+        AND (gbx.date_closed IS NULL)
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        dmsch.id_patient
+    FROM
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
+    WHERE
+        ((sd.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            AND (sd.closed = 0))
+    GROUP BY dmsch.id_patient)) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -521,12 +538,17 @@ FROM
     GROUP BY dm2.id_patient) e ON a.id_patient = e.id_patient
         LEFT JOIN
     (SELECT 
-        dm3.id_patient
-    FROM
-        dream_member dm3
-    INNER JOIN patient p1 ON p1.id = dm3.id_patient
-    INNER JOIN gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
-    GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
+    dm3.id_patient
+FROM
+    dream_member dm3
+        INNER JOIN
+    patient p1 ON p1.id = dm3.id_patient
+        INNER JOIN
+    gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
+WHERE
+    (gb.date_modified BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+        AND (gb.date_closed IS NULL)
+GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
         LEFT JOIN
     (SELECT 
         dmy.id_patient, lc.name AS commune, ld.name AS departement
@@ -551,15 +573,16 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
-    LEFT JOIN
+        LEFT JOIN
     (SELECT 
-        ds.id_patient
+        dmsch.id_patient
     FROM
-        caris_db.dreams_schooling ds
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
-        group by ds.id_patient) sc ON sc.id_patient = a.id_patient
+        ((sd.dat_peyman_fet BETWEEN '{Set_date.master_start.value}' AND '{Set_date.master_end.value}')
+            AND (sd.closed = 0))
+    GROUP BY dmsch.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -580,6 +603,7 @@ FROM
     WHERE
         dga.value = 'P'
             AND dgs.date < '{Set_date.master_start.value}')) past ON past.id_patient = a.id_patient
+
 """
 
 agyw_served_period = pd.read_sql_query(text(query_period), engine.connect(), parse_dates=True)

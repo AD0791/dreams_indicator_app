@@ -1,6 +1,6 @@
 use caris_db;
-set @start_date="2022-10-01";
-set @end_date="2023-09-30";
+set @start_date="2023-10-01";
+set @end_date="2024-09-30";
 
 
 SELECT 
@@ -122,13 +122,16 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
+    WHERE
+        (gbx.date_modified BETWEEN @start_date AND @end_date)
+            AND (gbx.date_closed IS NULL)
     GROUP BY dmx.id_patient) UNION (SELECT 
         dmsch.id_patient
     FROM
         schooling_dreams sd
     LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
-        ((sd.dat_peyman_fet BETWEEN @date_start AND @date_end)
+        ((sd.dat_peyman_fet BETWEEN @start_date AND @date_end)
             AND (sd.closed = 0))
     GROUP BY dmsch.id_patient)) a
         LEFT JOIN
@@ -218,6 +221,9 @@ FROM
         dream_member dm3
     INNER JOIN patient p1 ON p1.id = dm3.id_patient
     INNER JOIN gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
+    WHERE
+        (gb.date_modified BETWEEN @start_date AND @end_date)
+            AND (gb.date_closed IS NULL)
     GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
         LEFT JOIN
     (SELECT 
@@ -250,7 +256,7 @@ FROM
         schooling_dreams sd
     LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
-        ((sd.dat_peyman_fet BETWEEN @date_start AND @date_end)
+        ((sd.dat_peyman_fet BETWEEN @start_date AND @date_end)
             AND (sd.closed = 0))
     GROUP BY dmsch.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
