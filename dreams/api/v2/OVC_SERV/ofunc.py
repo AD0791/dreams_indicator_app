@@ -100,10 +100,10 @@ def complete_at_least(df):
 
 
 def isEnrolledQ2(date):
-    return "yes" if (type(date) != type(NaT)) and (date.year == 2023 and date.month >= 1 and date.month <= 3) else "no"
+    return "yes" if (type(date) != type(NaT)) and (date.year == 2024 and date.month >= 1 and date.month <= 3) else "no"
 
 def isEnrolledQ4(date):
-    return "yes" if (type(date) != type(NaT)) and (date.year == 2023 and date.month >= 7 and date.month <= 9) else "no"
+    return "yes" if (type(date) != type(NaT)) and (date.year == 2024 and date.month >= 7 and date.month <= 9) else "no"
 
 
 # not implemented yet

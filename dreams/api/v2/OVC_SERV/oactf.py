@@ -7,6 +7,7 @@ from numpy import int16
 from enum import Enum
 from datetime import datetime
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 import os
@@ -24,8 +25,8 @@ DBNAME = config('DBCaris')
 
 
 class Set_date(Enum):
-    period_start = "2022-10-01"
-    period_end = "2023-09-30"
+    period_start = "2023-10-01"
+    period_end = "2024-03-31"
 
 
 # get the engine to connect and fetch
@@ -152,13 +153,18 @@ FROM
         dream_member dmx
     INNER JOIN patient px ON px.id = dmx.id_patient
     INNER JOIN gardening_beneficiary gbx ON gbx.code_dreams = px.patient_code
-    GROUP BY dmx.id_patient) UNION (SELECT 
-        ds.id_patient
-    FROM
-        caris_db.dreams_schooling ds
     WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-            AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'))) a
+    (gbx.date_modified BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        AND (gbx.date_closed IS NULL)
+    GROUP BY dmx.id_patient) UNION (SELECT 
+        dmsch.id_patient
+    FROM
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
+    WHERE
+        ((sd.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            AND (sd.closed = 0))
+    GROUP BY dmsch.id_patient)) a
         LEFT JOIN
     (SELECT 
         xy.id_patient,
@@ -241,12 +247,17 @@ FROM
     GROUP BY dm2.id_patient) e ON a.id_patient = e.id_patient
         LEFT JOIN
     (SELECT 
-        dm3.id_patient
-    FROM
-        dream_member dm3
-    INNER JOIN patient p1 ON p1.id = dm3.id_patient
-    INNER JOIN gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
-    GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
+    dm3.id_patient
+FROM
+    dream_member dm3
+        INNER JOIN
+    patient p1 ON p1.id = dm3.id_patient
+        INNER JOIN
+    gardening_beneficiary gb ON gb.code_dreams = p1.patient_code
+WHERE
+    (gb.date_modified BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+        AND (gb.date_closed IS NULL)
+GROUP BY dm3.id_patient) f ON a.id_patient = f.id_patient
         LEFT JOIN
     (SELECT 
         dmy.id_patient, lc.name AS commune, ld.name AS departement
@@ -254,8 +265,8 @@ FROM
         dream_member dmy
     LEFT JOIN dream_group dg ON dg.id = dmy.id_group
     LEFT JOIN dream_hub dh ON dh.id = dg.id_dream_hub
-    LEFT JOIN lookup_commune_old lc ON lc.id = dh.commune
-    LEFT JOIN lookup_departement_old ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
+    LEFT JOIN lookup_commune lc ON lc.id = dh.commune
+    LEFT JOIN lookup_departement ld ON ld.id = lc.departement) g ON a.id_patient = g.id_patient
         LEFT JOIN
     (SELECT 
         dpga.id_patient,
@@ -271,16 +282,16 @@ FROM
             OR dpga.yg_vd = 'P')
             AND dpgs.date BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}'
     GROUP BY id_patient) h ON h.id_patient = a.id_patient
-    LEFT JOIN
+        LEFT JOIN
     (SELECT 
-        ds.id_patient
+        dmsch.id_patient
     FROM
-        caris_db.dreams_schooling ds
+        schooling_dreams sd
+    LEFT JOIN dream_member dmsch ON dmsch.case_id = sd.parent_id
     WHERE
-        ds.closed = FALSE AND ds.eskew_peye = 1
-        AND (ds.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
-        group by ds.id_patient
-    ) sc ON sc.id_patient = a.id_patient
+        ((sd.dat_peyman_fet BETWEEN '{Set_date.period_start.value}' AND '{Set_date.period_end.value}')
+            AND (sd.closed = 0))
+    GROUP BY dmsch.id_patient) sc ON sc.id_patient = a.id_patient
         LEFT JOIN
     ((SELECT 
         dhi.id_patient
@@ -557,10 +568,7 @@ email = os.getenv('COMCARE_EMAIL')
 password_cc = os.getenv('COMCARE_PASSWORD')
 
 #Defining the driver
-#driver = webdriver.Chrome(ChromeDriverManager().install())
-import chromedriver_autoinstaller as chai
-chai.install()
-driver = webdriver.Chrome()
+driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()))
 driver.implicitly_wait(1000)
 
 #Creating login function
