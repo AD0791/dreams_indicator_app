@@ -36,6 +36,7 @@ class AgywPrev:
     def __init__(self, commune=None):
         self.__commune = commune
         self.__i_am = f"{AgywPrev.__who_am_I}"
+        AGYW_ACTIF.commune.mask(AGYW_ACTIF['commune']=='Gonaives','Dessalines/Marchandes',inplace=True)
         self.__data = AGYW_ACTIF
         self. __total_mastersheet = self.__data.id_patient.count()
         if self.__commune == None:
